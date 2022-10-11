@@ -1,5 +1,5 @@
 # Manufacturing-SCP
-Outline for Fall Quarter
+## Outline for Fall Quarter
 * Weeks 1 - 3: Get acquainted with GitHub best practices.
 * Week 4: Create progress outline for the quarter.
   * Organize files into folders within new repository in GitHub
