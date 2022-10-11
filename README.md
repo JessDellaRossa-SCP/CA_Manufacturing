@@ -9,4 +9,8 @@ Outline for Fall Quarter
   * Make list of deliverables and goals to create them
   * Finalize product categories and include them in Master Facility .csv
 * Week 6: Statistical analysis of sensitive ecosystems
-* Week 7: 
+* Week 7: Map facilities
+* Week 8: Map aquatic & terrestrial sensitive ecosystems
+* Week 9: Map disadvantaged communities
+* Week 10: Shiny App - need help
+* Week 11: 
