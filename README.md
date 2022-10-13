@@ -12,5 +12,5 @@
 * Week 7: Map facilities
 * Week 8: Map aquatic & terrestrial sensitive ecosystems
 * Week 9: Map disadvantaged communities
-* Week 10: Shiny App - need help
-* Week 11: 
+* Week 10: Shiny App Exploration
+* Week 11: Have some final Shiny to show
