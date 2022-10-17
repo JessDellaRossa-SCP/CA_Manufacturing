@@ -5,7 +5,7 @@
   * Organize files into folders within new repository in GitHub
   * Go to Week 3 lecture
   * Look at Ecosystems data to see if Stats team wants to analyze this
-# Current
+### Current Week 5
 * Week 5: Research Shiny App 
   * Make list of deliverables and goals to create them
   * Finalize product categories and include them in Master Facility .csv
