@@ -1,0 +1,196 @@
+---
+title: "FRS, TRI, EIS, CERS Comparison"
+author: "Jess"
+date: '2022-09-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
+rm(list=ls())
+```
+
+#Read in data csv files for comparison. There are 40,297 total FRS facilities, and we need to see if there are additional manufacturing locations to consider that may be registered under other reporting systems. 
+#frs, eis, cers and tri have all been manicured for the NAICS and SIC codes that we are interested in for this project.
+#facilities.csv is a list of all FRS facilities in California and the associated facility codes joined in for our comparison of data sets.
+```{r}
+frs <- read.csv("FRS_Master_List_2.csv")
+eis <- read.csv("EIS_FINAL.csv")
+cers <- read.csv("CERSS_FINAL.csv")
+cers_site <- read.csv("CERS_site.csv")
+tri <- read.csv("TRI_FINAL_2.csv")
+facilities <- read.csv("Facilities_Master_CODES.csv")
+```
+
+#Compare TRI and FRS data to see if there are additional facilities registered in TRI and not FRS.
+#Create a new dataframe - only pull the FRS ID columns and rename them to match.
+```{r}
+tri_trim <- as.data.frame(tri[,c(4,16)])
+frs_trim <- as.data.frame(frs[,1])
+
+colnames(tri_trim)[1] ="TRI_ID"
+colnames(tri_trim)[2]="RegistryID"
+colnames(frs_trim)[1] ="RegistryID"
+```
+
+#Add in a column to the trimmed dataframes to associate the facility with the datasource.
+```{r}
+tri_trim <- tri_trim %>% 
+  mutate(From_TRI = "TRI")
+
+frs_trim <- frs_trim %>% 
+  mutate(From_FRS = "FRS")
+```
+
+#Join the FRS and TRI trimmed dataframes to see if there are any new facilities from the TRI data that were not captured in FRS. There are 29 facilities from TRI not captured in FRS.
+```{r}
+tri_comparison <- right_join(frs_trim, tri_trim, by = "RegistryID")
+sum(is.na(tri_comparison$From_FRS))
+```
+
+#Create a new datframe of the TRI FRS IDs that need to be added to the Master FRS List. 
+```{r}
+new_from_tri <- subset(tri_comparison, is.na(tri_comparison$From_FRS))
+```
+
+#Now we can try a similar process using the "facilities" df to compare EIS facility codes in the EIS data and FRS data.
+#First, we need to create a trimmed df of EIS facilities only. 
+#Next, we need to pull in the EIS Facility ID from the facilities df. Then compare to the frs_trim df using the same method we used for TRI.
+```{r}
+colnames(facilities)[3] <- "EIS.Facility.ID"
+colnames(facilities)[1] <- "RegistryID"
+colnames(frs)[1] <- "RegistryID"
+
+eis <- right_join(facilities, eis, by= "EIS.Facility.ID")
+eis <- eis[,colnames(eis)[c(1:3, 28:65)]]
+
+eis_trim <- as.data.frame(eis[,c(1,3)])
+colnames(eis_trim)[2] <- "EIS.Facility.ID"
+
+eis_trim <- eis_trim %>% 
+  mutate(From_EIS = "EIS")
+
+sum(is.na(eis_trim$RegistryID))
+```
+#There are 6,745 NEW facilities from the EIS data that do not match up to a FRS Registry ID. However, we need to see how many facilities overlap with FRS data.
+
+#Join the facilities with the frs list to bring in the other types of facility codes. Add these codes into the frs_trim df. 
+```{r}
+frs_with_codes <- full_join(frs, facilities, by = "RegistryID")
+frs_with_codes <- frs_with_codes[,colnames(frs_with_codes)[c(1, 23:66)]]
+
+frs_trim <- left_join(frs_trim, frs_with_codes, by = "RegistryID")
+frs_trim <- frs_trim[,colnames(frs_trim)[c(1,2, 20:27)]]
+```
+
+#Compare the EIS facility IDs from the trimmed frs_trim and eis_trim datasets. There are 6,870 facilities that were not captured in our analysis of the FRS data. Only 125 exist on the master facility list and the remaining 6,745 will need to be added using the primary data from the EIS dataset. 
+```{r}
+colnames(frs_trim)[3]="EIS.Facility.ID"
+eis_comparison <- right_join(frs_trim, eis_trim, by = "EIS.Facility.ID")
+sum(is.na(eis_comparison$From_FRS))
+```
+#Create a new datframe of the EIS IDs that need to be added to the Master FRS List. 
+```{r}
+new_from_eis <- subset(eis_comparison, is.na(eis_comparison$From_FRS))
+```
+
+
+#Bring in CalEPA Site ID into CERS data to map to FRS Registry ID.
+#First, create matching column names for the Address columns. Upper case the addresses in both the cers and cers_site dfs so they can be joined for comparison.
+```{r}
+colnames(cers)[3] <- "Address"
+colnames(cers_site)[3] <- "Address"
+colnames(cers_site)
+cers_order <- c("SiteName", "SiteID", "Address", "City", "ZIP","Latitude", "Longitude", "Permitted.Site")
+cers_site <- cers_site[,cers_order]
+cers_site$Address<- toupper(cers_site$Address)
+cers$Address <- toupper(cers$Address)
+```
+#Join the two dataframes together in order to pull in the CalEPA Site number into the CERS data. Make sure each facility is distinct.
+```{r}
+cers_added_site <- left_join(cers, cers_site, by = "Address")
+cers_added_site <- cers_added_site %>% 
+  distinct(CERSID, .keep_all=TRUE)
+```
+
+#Create a new df for cers CalEPA sites and join it with the cers data.
+```{r}
+epa_site <-cers_added_site[,colnames(cers_added_site) [c(1,87)]]
+cers <- inner_join(cers, epa_site, by= "CERSID")
+cers <- cers[,colnames(cers)[c(1:7, 85, 86)]]
+colnames(cers)[9] <- "CalEPA_Site"
+colnames(frs_trim)[7] <- "CalEPA_Site"
+```
+
+
+#Now compare the cers data with the frs_trim information using the CalEPA_Site column.
+```{r}
+cers_comparison <- inner_join(cers, frs_trim, by= "CalEPA_Site")
+cers_comparison <- cers_comparison %>% 
+  distinct(CalEPA_Site, .keep_all=TRUE)
+cers_comparison <- cers_comparison[,colnames(cers_comparison) [c(17:7,9)]]
+sum(is.na(cers_comparison$From_FRS))
+```
+#This comparison indicates that there are 0 new facilities to add from the CERS data into the FRS list.
+
+#In total, there are 29 facilities from TRI data that need to be added to our master source list.
+
+#There are 125 facilities on the Facilties list to add to the master from EIS, and 6,745 facilities that need to be added using EIS data information. 
+
+#Create a new dataframe of the new facilities from TRI and all of the cleaned up FRS facilities. 
+```{r}
+colnames(tri)[16] <- "RegistryID"
+colnames(facilities)[5] <- "TRI_ID"
+new_from_tri <- left_join(new_from_tri, facilities, by = "TRI_ID")
+new_from_tri <- new_from_tri[,colnames(new_from_tri) [c(1, 14, 2, 3, 4, 5, 6, 7, 49, 50, 8, 9, 10, 11, 12)]]
+```
+
+#Match up the FRS column headers with the frs_tri_cers dataframe.
+```{r}
+frs[,"EIS.Facility.ID"] = NA
+frs <-  frs[,colnames(frs) [c(1,39,2,3,5,6,8,11,17,18,27,29,31,32,37)]]
+```
+
+#Then create a subset dataframe of the new EIS facilties. Match up the columns to create a one master file. 
+#First, join the new_from_eis to the eis dataframe and reduce the columns.
+```{r}
+new_from_eis <- left_join(new_from_eis, eis, by = "EIS.Facility.ID")
+new_from_eis[,"SIC"] = NA
+new_from_eis <- new_from_eis[,colnames(new_from_eis) [c(13, 3, 14, 16, 18, 19, 21, 24, 25, 26, 42, 53, 27, 28, 33)]]
+```
+
+# Before rbinding, create an order for the columns to make sure they are all aligned perfectly. 
+```{r}
+master_columns <- c("FRS_Registry_ID" = 1, "EIS_Facility_ID" = 2, "Facility_NAME" = 3, "LOCATION_ADDRESS" = 4,  "CITY_NAME" = 5, "COUNTY_NAME" = 6, "STATE_CODE" = 7, "POSTAL_CODE" = 8, "CENSUS_BLOCK_CODE" = 9, "HUC_CODE" = 10, "NAICS_CODES" = 11, "SIC_CODES" = 12, "LATITUDE83" = 13, "LONGITUDE83" = 14 , "DATUM" = 15)
+frs <- frs %>% 
+  rename(master_columns) %>% 
+  rename_with(toupper)
+new_from_eis <- new_from_eis %>% 
+  rename(master_columns) %>% 
+  rename_with(toupper)
+new_from_tri <- new_from_tri %>% 
+  rename(master_columns) %>% 
+  rename_with(toupper)
+```
+
+#From here, rbind the following datatables: *new_from_eis*, *frs_tri_cers*, and *frs*. Then check to see how many duplicated FRS Registry IDs and EIS Facility IDs are present. There are none!
+```{r}
+master <- rbind(frs, new_from_eis, new_from_tri)
+master %>% 
+  count(FRS_REGISTRY_ID) %>% 
+  arrange(desc(n))
+
+master %>% 
+  count(EIS_FACILITY_ID) %>% 
+  arrange(desc(n))
+
+```
+ 
+#Finally, save the Master Facilities File.
+```{r}
+#write.csv(master, "~\\DTSC\\Manufacturing_Projects\\csv\\Master_Facility_FINAL.csv", row.names=FALSE) 
+```
+

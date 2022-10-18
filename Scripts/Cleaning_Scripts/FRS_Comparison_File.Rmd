@@ -1,0 +1,52 @@
+---
+title: "FRS_Comparison"
+author: "Jess"
+date: '2022-08-31'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(readxl)
+library(dplyr)
+knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
+```
+
+```{r}
+Jess <- read.csv("FRS_FINAL.CSV")
+Elena <- read.csv("FRS_Master_List.csv")
+
+```
+
+```{r}
+Elena_frs <- as.data.frame(Elena[,1])
+Jess_frs <- as.data.frame(Jess[,1])
+```
+
+```{r}
+colnames(Jess_frs)[1] ="RegistryID"
+colnames(Elena_frs)[1]="RegistryID"
+```
+
+```{r}
+Jess_frs <- Jess_frs %>% 
+  mutate(Jess_file = "Jess")
+
+Elena_frs <- Elena_frs %>% 
+  mutate(Elena_file = "Elena")
+```
+
+```{r}
+comparison <- full_join(Jess_frs, Elena_frs, by = "RegistryID")
+```
+
+```{r}
+sum(is.na(comparison$Jess_file))
+sum(is.na(comparison$Elena_file))
+nrow(comparison[comparison$Jess_file == "Jess" & !is.na(comparison$Jess_file) & comparison$Elena_file == "Elena" & !is.na(comparison$Elena_file), ])
+
+#There is a total of 40,307 unique facilities, of which 39,962 are present in both Elena and Jess' files.
+#This was a method to check that if a query would work and that the database is categorizing its data according to our needs.
+```
+
