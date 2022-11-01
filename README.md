@@ -10,7 +10,7 @@
 * Week 6: Finalize facilities list & overview of NAICS
    ### Current Week 7
 * Week 7: Statistical analysis of sensitive ecosystems
- * Complete GitHub set up 
+  * Complete GitHub set up 
 * Week 8: Map aquatic & terrestrial sensitive ecosystems, & facilities
  * Finalize product categories and include them in Master Facility .csv
 * Week 9: Map disadvantaged communities
