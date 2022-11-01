@@ -7,11 +7,11 @@
   * Look at Ecosystems data to see if Stats team wants to analyze this - Yes!
 * Week 5: Research Shiny App 
   * Make list of deliverables and goals to create them
-  ### Current Week 6
-* Week 6: Statistical analysis of sensitive ecosystems
- * Finalize facilities list & overview of NAICS
-* Week 7: Map facilities
-* Week 8: Map aquatic & terrestrial sensitive ecosystems
+* Week 6: Finalize facilities list & overview of NAICS
+   ### Current Week 7
+* Week 7: Statistical analysis of sensitive ecosystems
+ * Complete GitHub set up 
+* Week 8: Map aquatic & terrestrial sensitive ecosystems, & facilities
  * Finalize product categories and include them in Master Facility .csv
 * Week 9: Map disadvantaged communities
 * Week 10: Shiny App Exploration
