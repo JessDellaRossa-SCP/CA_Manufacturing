@@ -6,6 +6,10 @@ setwd("~/DTSC/Manufacturing_Projects/csv")
 #Now that we have one .csv that omits blank rows and "NULL" NAICS codes, we can clean up the CERS data to only include relevant information.
 cers <- read.csv("CERS_Clean.csv")
 
+colnames(cers)
+#There are no blank NAICS, so we should not need to use SIC at all.
+sum(is.na(cers$NAICSCode))
+
 #Now we need to find only NAICS codes that start with 31-33 and omit everything else. This will take the total from 468,961 to 130,452 rows.
 cers <-  cers %>% 
   filter(grepl("^31", NAICSCode) | grepl("^32", NAICSCode)| grepl("^33", NAICSCode))
