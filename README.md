@@ -22,14 +22,14 @@
 
 
 ### Breakdwon of Tasks for Elena and Jess through 2022
- * Identify candidate chemicals used in manufacturing - *Elena*
+* Identify candidate chemicals used in manufacturing - *Elena*
   * due 11/29/2022
- * Elena out 11/30 - 12/12
- * Statistical analysis and plotting of significant habitats - *Jess*
+* Elena out 11/30 - 12/12
+  * Statistical analysis and plotting of significant habitats - *Jess*
   * due 12/1
- * Jess - school finals 12/2 - 12/7
- * Geocode facility addresses to coordinates for missing coordinates - *Elena*
+* Jess - school finals 12/2 - 12/7
+* Geocode facility addresses to coordinates for missing coordinates - *Elena*
   * due 12/30/2022
- * Identify product categories for manufacturing with NAICS/SIC - *Jess*
+* Identify product categories for manufacturing with NAICS/SIC - *Jess*
   * due 12/30/2022
- * Focus on mapping in 2023
+* Focus on mapping in 2023
