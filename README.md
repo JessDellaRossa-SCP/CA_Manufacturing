@@ -18,7 +18,7 @@
   * See if manipulation is possible
 * Week 10: Shiny App Exploration
   * Attend Tara's Presentation on 11/23
-* Week 11: Have some final Shiny to show
+* Week 11: Final data analysis for spatial exploration in 2023
 
 
 ### Breakdwon of Tasks for Elena and Jess through 2022
