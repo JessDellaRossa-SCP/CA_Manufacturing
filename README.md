@@ -12,7 +12,8 @@
   * Complete GitHub set up 
   * Set up data folders
    ### Current Week 8  
-* Week 8: Statistical analysis of sensitive ecosystems
+* Week 8: Statistical analysis of significant habitats
+  * Plots for significant habitats
 * Week 9: Create static map with one other variable
   * See if manipulation is possible
 * Week 10: Shiny App Exploration
