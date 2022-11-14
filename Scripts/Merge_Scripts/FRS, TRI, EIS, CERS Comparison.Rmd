@@ -104,7 +104,7 @@ new_from_eis <- subset(eis_comparison, is.na(eis_comparison$From_FRS))
 colnames(cers)[3] <- "Address"
 colnames(cers_site)[3] <- "Address"
 colnames(cers_site)
-cers_order <- c("SiteName", "SiteID", "Address", "City", "ZIP","Latitude", "Longitude", "Permitted.Site")
+cers_order <- c("SiteName", "SiteID", "Address", "City", "ZIP","Latitude", "Longitude", "X")
 cers_site <- cers_site[,cers_order]
 cers_site$Address<- toupper(cers_site$Address)
 cers$Address <- toupper(cers$Address)
