@@ -1,0 +1,382 @@
+---
+title: "FRS_project"
+author: "Elena"
+date: '2022-08-19'
+output: html_document
+---
+Data to compile from FRS:
+
+ * Facility Name  	
+ * Street Address	
+ * City  
+ * Zip  	
+ * County	
+ * State 	
+ * Latitude	
+ * Longitude 	
+ * FRS ID	X 
+ * NAICS Code	
+ * SIC Code 
+ 
+
+To upload the data from FRS go to https://www.epa.gov/frs/epa-state-combined-csv-download-files click on California on the map.
+Zip file (200 Mb) will be downloaded automatically. Or [click here](https://ordsext.epa.gov/FLA/www3/state_files/state_combined_ca.zip).
+
+The purpose of this code is to: 
+
+**(1)** extract data according to above list by: 
+
+ **(1.1)** performing filtering according to selected NAICS (31-33)/SIC(20-39) codes, 
+ 
+ **(1.2)** joining the tables by Registry Id (or FRS Id - used interchangeably),
+ 
+ **(1.3)** cleaning by removing (i.e., saving separately) missing data for further investigation.
+
+The result is three tables: 
+ - *FRS_bothCodes* (open to suggestion for better naming!): 46763 lines, 36238 Unique Facilities 
+
+ - *FRS_noCoords*: 7581 lines, 7279 Unique Facilities 
+
+ - *FRS_corrupted_county*: 1339 lines, 1321 Unique Facilities.
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) #for tidy data
+library(readr) # for efficient read of files
+library(naniar) # for dealing with NAs
+library(janitor) #for automatically cleaning names from upeer case to lower
+library(stringr) #for cleaning the strings
+
+```
+
+#Upload file with FRS Facilities and their Addresses
+```{r CA_FACILITY_FILE.CSV}
+FRS_Address <- read.csv("CA_FACILITY_FILE.CSV") 
+FRS_Address <- clean_names(FRS_Address)
+names(FRS_Address)
+
+#remove unnecessary columns. leave frsId, company name, address, city, county, state,zip, lat, long
+FRS_Address <- FRS_Address[, c(2:4, 6,7, 9, 12, 27, 28)] # total number of addressees is 654419; all lines in the df are unique
+
+#length(unique(FRS_Address$registry_id))
+#sum(duplicated(FRS_Address)) #0
+#vis_miss(FRS_Address, warn_large_data = FALSE) #use only if you have memory (takes up to 3 Gb with this data set)
+
+```
+
+In address file we have 32.23% of missing coordinates (for ALL facilities), meaning around 1/3 of the FRS data do not have coordinates responded to the Facility Address. Later, we will see that percentage of missing coordinates for the subset of interest is much lower.
+I will subset FRS_noCoords with codes of interest later here. This way we can perform geocoding.
+Thus, there must be two final files: 1) full file with all facilities of interest, 2) with facilities where coordinates are absent.
+
+
+#Prepare Facilities with NAICS of interest
+```{r CA_NAICS_FILE.csv}
+#read NAICS codes
+FRS_NAICS <- read.csv("CA_NAICS_FILE.csv") #number of rows = 468732
+FRS_NAICS <- janitor::clean_names(FRS_NAICS) #lower case all column headers
+names(FRS_NAICS)
+
+#leave columns: frsId, naics code, code description
+FRS_NAICS <- FRS_NAICS[, c(1,5,7)]
+
+#check how many NAs
+#vis_miss(FRS_NAICS, warn_large_data = FALSE) #no NAs
+
+#length(unique(FRS_NAICS$registry_id)) #unique FRS_id = 370020 => meaning that some FRS_id report to programs by several NAICS 
+#sum(duplicated(FRS_NAICS)) #56063 duplicates detected (for FRS_id, naics code, description) after I removed other columns
+
+#drop duplictes
+FRS_NAICS <- distinct(FRS_NAICS) #412669 left after removing duplicates
+412669+56063 #=468732
+
+#FRSwithNAICS_Frequency <- as.data.frame(table(FRS_NAICS$registry_id)) #some FRS Id report with up to 10 different NAICS codes
+412669+56063 #=468732
+
+#leave only manufacturing facilities (31-33)
+FRS_NAICS <- FRS_NAICS %>%  filter(grepl("^31",naics_code) | grepl("^32", naics_code)| grepl("^33", naics_code)) #after filter, only 46617 lines left: 38001 unique facilities left
+
+#remove naics codes that were rejected during the meeting
+FRS_NAICS <- FRS_NAICS %>%  filter(!naics_code %in% c(311, 
+3111, 31111, 311111, 311119, 3112, 31121, 311211, 311212, 311213, 31122, 311221, 311224, 311225, 31123, 311230, 3113, 31131, 311313, 311314, 31134, 311340, 31135, 311351, 311352, 3114, 31141, 311411, 311412, 31142, 311421, 311422, 311423, 3115, 31151, 311511, 
+311512, 311513, 311514, 31152, 311520, 3116, 31161, 311611, 311612, 311613, 311615, 3117, 31171, 311710, 3118, 31181, 311811, 311812, 
+311813, 31182, 311821, 311824, 31183, 311830, 3119, 31191, 311911, 311919, 31192, 311920, 31193, 311930, 31194, 311941, 311942, 31199, 311991, 311999, 312, 3121, 31211, 312111, 312112, 312113, 31212, 312120, 31213, 312130, 31214, 312140, 32312, 323120, 3253, 32532, 
+325320, 325412, 325413, 325414, 3391, 33911, 339112, 339113, 339114, 339116)) 
+
+#length(unique(FRS_NAICS$registry_id)) #32379 unique facilities left
+```
+
+## Facilities with apropriate NAICS and Address
+```{r Join Address with NAICS of interest}
+FRS_address_naics <- inner_join(FRS_Address, FRS_NAICS, by = "registry_id") #39687 lines
+
+#sum(duplicated(FRS_Address)) #0
+#vis_miss(FRS_address_naics, warn_large_data = FALSE)
+#length(unique(FRS_address_naics$registry_id)) #32379 unique facilities
+
+```
+
+Out of 654419 frs_id, 370020 facilities have NAICS (this statement migrated from previous version of transforming FRS data).
+Out of 370020 facilities with NAICS, 32379 facility of interest.
+
+#Prepare Facilities with SIC of interest
+```{r CA_SIC_FILE.CSV}
+FRS_SIC <- read.csv("CA_SIC_FILE.CSV") #total of 168253 lines
+
+FRS_SIC <- clean_names(FRS_SIC)
+names(FRS_SIC)
+
+FRS_SIC <- FRS_SIC[, c(1,5,7)]
+
+#length(unique(FRS_SIC$registry_id)) #118069 has unique frs id
+#sum(duplicated(FRS_SIC))  #out of 168253, 44330 are duplicates
+
+FRS_SIC <- distinct(FRS_SIC) #123923 are total line left after removing duplicates
+#vis_miss(FRS_SIC, warn_large_data = FALSE)
+
+#filter for the office of manufacturing SIC (20-39)
+FRS_SIC <- FRS_SIC %>%  filter(grepl("^2",sic_code) | grepl("^3",sic_code)) #30517 sic codes from office of manufacturing is left
+#???
+
+FRS_SIC <- FRS_SIC %>% filter(!sic_code %in% c(2011, 2013, 2015, 2021, 2022, 2023, 2024, 2026, 2032, 2033, 2034, 2035, 2037, 2038, 2041, 2043, 2044, 2045, 2046, 2047, 2048, 2051, 2052, 2053, 2061, 2062, 2063, 2064, 2066, 2067, 2068, 2074, 2075, 2076, 2077, 2079, 
+2082, 2083, 2084, 2085, 2086, 2087, 2091, 2092, 2095, 2096, 2097, 2098, 2099, 2499, 2599, 2789, 2791, 2796, 2834, 2835, 2836, 2879, 2899, 3069, 3089, 3821, 3829, 3841, 3842, 3843, 3851, 2411, 2711, 2721, 2731, 2741, 2771, 3652, 3721, 3732))
+#23332 sic lines; 21607 unique facilities
+
+```
+
+## Facilities with apropriate SIC and Address
+```{r Join Address with SIC (20-39)}
+FRS_address_sic <- inner_join(FRS_Address, FRS_SIC, by = "registry_id")
+#sum(duplicated(FRS_address_sic)) #0
+
+#vis_miss(FRS_address_sic, warn_large_data = FALSE)
+```
+
+#Merging NAICS and SIC
+```{r Join NAICS and SIC; preserve data with no Coords}
+length(unique(FRS_address_naics$registry_id)) #32379 unique frs
+length(unique(FRS_address_sic$registry_id))#21607 unique frs
+
+FRS_bothCodes <- full_join(FRS_address_naics, FRS_address_sic, 
+                           by = c("registry_id", "primary_name", 
+                                  "location_address", "city_name", 
+                                  "county_name", "postal_code",
+                                  "latitude83", "longitude83", "state_code")) #54345 lines; #this is a Master list by Elena
+
+names(FRS_bothCodes) <- c("frs_id", "primary_name", "facility_address", "city", "county", "state", "ZIP", "lat","long","NAICS","NAICS_description", "SIC", "SIC_description") 
+
+#vis_miss(FRS_bothCodes, warn_large_data = FALSE)
+
+#subset data with absent coordinate for later analysis
+FRS_noCoords <- subset(FRS_bothCodes, 
+                       (is.na(FRS_bothCodes[,8])) & (is.na(FRS_bothCodes[,9]))) 
+#(col 8 and 9 are lat and long accordingly)
+length(unique(FRS_noCoords$frs_id)) #out of facilities with codes of interest (NAICS or SIC), 7279 facilities does not have coordinates
+
+#FRS_bothCodes <- FRS_bothCodes %>%  drop_na(lat) #46764 lines with coords left
+length(unique(FRS_bothCodes$frs_id)) #43518 unique facilities
+```
+
+```{r Cleaning strings in Master file}
+
+#remove NA's from NAICS/SIC and their description
+FRS_bothCodes$NAICS[is.na(FRS_bothCodes$NAICS)] <- 0
+FRS_bothCodes$SIC[is.na(FRS_bothCodes$SIC)] <- 0
+FRS_bothCodes$NAICS_description[is.na(FRS_bothCodes$NAICS_description)] <- "missing"
+FRS_bothCodes$SIC_description[is.na(FRS_bothCodes$SIC_description)] <- "missing"
+
+#FRS_bothCodes$facility_address[is.na(FRS_bothCodes$facility_address)] <- "missing"
+noaddressE <- filter(FRS_bothCodes, facility_address == "")
+
+
+FRS_bothCodes$county <- str_to_title(FRS_bothCodes$county)
+FRS_bothCodes$city <- str_to_title(FRS_bothCodes$city)
+FRS_bothCodes$primary_name <- str_to_title(FRS_bothCodes$primary_name)
+FRS_bothCodes$facility_address <- str_to_title(FRS_bothCodes$facility_address)
+FRS_bothCodes$NAICS_description <- str_to_title(FRS_bothCodes$NAICS_description)
+FRS_bothCodes$SIC_description <- str_to_title(FRS_bothCodes$SIC_description)
+```
+
+
+```{r Cleaning counties and zip-codes}
+
+unique(FRS_bothCodes$county)
+FRS_bothCodes$county <- str_replace_all(FRS_bothCodes$county, pattern = "\\sCou\\S+", replacement ="")
+
+county_infrs<- as.data.frame(table(FRS_bothCodes$county))
+
+county_list <- c('Alameda', 'Alpine', 'Amador', 
+            'Butte', 
+            'Calaveras', 'Colusa', 'Contra Costa', 
+            'Del Norte', 
+            'El Dorado', 
+            'Fresno', 
+            'Glenn', 
+            'Humboldt', 
+            'Imperial', 'Inyo', 
+            'Kern', 'Kings', 
+            'Lake', 'Lassen', 'Los Angeles', 
+            'Madera', 'Marin', 'Mariposa', 'Mendocino', 'Merced', 'Modoc', 'Mono', 'Monterey', 
+            'Napa', 'Nevada', 
+            'Orange', 
+            'Placer', 'Plumas', 
+            'Riverside', 
+            'Sacramento', 'San Benito', 'San Bernardino', 'San Diego', 'San Francisco', 'San Joaquin', 'San Luis Obispo', 'San Mateo', 'Santa Barbara', 'Santa Clara', 'Santa Cruz', 'Shasta', 'Sierra', 'Siskiyou', 'Solano', 'Sonoma', 'Stanislaus', 'Sutter', 
+            'Tehama', 'Tuolumne', 'Trinity', 'Tulare', 
+            'Ventura', 
+            'Yolo', 'Yuba')
+check_county <-county_infrs %>%  mutate(check = ifelse(county_infrs$Var1 %in% county_list, "Valid", "Not valid"))
+#the table above will help to see what county names are misspelled and how many of those are present in table
+
+#La is used only once; after verifiying the address with google, La is fixed
+FRS_bothCodes$county[FRS_bothCodes$county=="La"] <- "Los Angeles"
+
+#missing counties and Union must be investigated:
+
+#get rid of blanks substituting them by "missing"
+FRS_bothCodes$county[FRS_bothCodes$county==""] <- "missing"
+#create a df with corrupted counties - *must be investigated*. #missing counties are not removed from the Master table. 
+FRS_corrupted_county <- FRS_bothCodes %>% 
+  filter(county=="missing" | county == "Union")
+#remove "Union" from county. Apparently the facility is not in state. Must be investigated.
+FRS_bothCodes <- filter(FRS_bothCodes, county != "Union") 
+
+FRS_bothCodes$ZIP <- substr(FRS_bothCodes$ZIP,1,5)
+```
+
+```{r Save master files}
+write.csv(FRS_bothCodes, "FRS_facility_codes.csv")
+write.csv(FRS_noCoords, "EG_FRSbothCodes_OnlyMissingCoords.csv")
+
+```
+both files are combined into excel workbook in teams https://cadtsc.sharepoint.com/sites/spwp-ChemPET/_layouts/15/Doc.aspx?OR=teams&action=edit&sourcedoc={44AB631A-6C40-40BE-88D8-05A13406D6C5}
+
+#Messy code but it will make sense!
+```{r from Jess raw data - may ignore}
+list.files()
+
+#raw file that Jess queried. What queries did she apply?
+Jess<- read.csv("FRS_31_33_raw.csv") #71827 lines
+
+names(Jess)
+Jess <- Jess[, c(1:3, 6:11, 17,18)]
+Jess <- distinct(Jess) #50781 
+
+#subset only data that have NAICS codes
+Jess_naics <- Jess %>%  subset(NAICS_CODE != 0) #38934
+
+#filter for naics of interest on the code
+Jess_naics <- Jess_naics %>%  filter(!NAICS_CODE %in% c(311, 
+3111, 31111, 311111, 311119, 3112, 31121, 311211, 311212, 311213, 31122, 311221, 311224, 311225, 31123, 311230, 3113, 31131, 311313, 311314, 31134, 311340, 31135, 311351, 311352, 3114, 31141, 311411, 311412, 31142, 311421, 311422, 311423, 3115, 31151, 311511, 
+311512, 311513, 311514, 31152, 311520, 3116, 31161, 311611, 311612, 311613, 311615, 3117, 31171, 311710, 3118, 31181, 311811, 311812, 
+311813, 31182, 311821, 311824, 31183, 311830, 3119, 31191, 311911, 311919, 31192, 311920, 31193, 311930, 31194, 311941, 311942, 31199, 311991, 311999, 312, 3121, 31211, 312111, 312112, 312113, 31212, 312120, 31213, 312130, 31214, 312140, 32312, 323120, 3253, 32532, 
+325320, 325412, 325413, 325414, 3391, 33911, 339112, 339113, 339114, 339116)) #32917 unique
+
+#subset only data that do not have NAICS (meaning data only have SIC codes)
+Jess_sic <- Jess %>%  subset(NAICS_CODE == 0) #11847
+
+Jess_sic <- Jess_sic %>% filter(!SIC_CODES %in% c(2011, 2013, 2015, 2021, 2022, 2023, 2024, 2026, 2032, 2033, 2034, 2035, 2037, 2038, 2041, 2043, 2044, 2045, 2046, 2047, 2048, 2051, 2052, 2053, 2061, 2062, 2063, 2064, 2066, 2067, 2068, 2074, 2075, 2076, 2077, 2079, 
+2082, 2083, 2084, 2085, 2086, 2087, 2091, 2092, 2095, 2096, 2097, 2098, 2099, 2499, 2599, 2789, 2791, 2796, 2834, 2835, 2836, 2879, 2899, 3069, 3089, 3821, 3829, 3841, 3842, 3843, 3851, 2411, 2711, 2721, 2731, 2741, 2771, 3652, 3721, 3732)) #7843 unique
+
+jess_bothcosedes <- rbind(Jess_naics, Jess_sic) #39981 unique
+
+elena_bothcodes <- FRS_bothCodes
+
+names(elena_bothcodes)
+elena_bothcodes <- elena_bothcodes[,c (1:9)]
+elena_bothcodes <- distinct(elena_bothcodes)
+
+length(unique(jess_bothcosedes$REGISTRY_ID)) #39981
+length(unique(elena_bothcodes$frs_id)) #43517
+
+check_by_join <- full_join(elena_bothcodes, jess_bothcosedes, by = c("frs_id" = "REGISTRY_ID"))
+
+elena_not_jess  <- elena_bothcodes %>%  mutate(check = ifelse(elena_bothcodes$frs_id %in% jess_bothcosedes$REGISTRY_ID, "both", "elena"))
+subset_elena <- elena_not_jess %>% subset(check == "elena")
+jess_not_elens  <- jess_bothcosedes %>%  mutate(check = ifelse(jess_bothcosedes$REGISTRY_ID %in% elena_bothcodes$frs_id, "both", "jess"))
+subset_jess <- jess_not_elens %>%  subset(check == "jess")
+
+```
+
+```{r from Jess final data}
+
+#use Jess final file
+final_jess <- read.csv("FRS_FINAL.csv")
+names(final_jess)
+final_jess <- final_jess[, c(1:3, 6:11, 17,18)]
+final_jess <- distinct(final_jess) #39962 
+
+elena_bothcodes <- FRS_bothCodes
+names(elena_bothcodes)
+elena_bothcodes <- elena_bothcodes[,c (1:9)]
+elena_bothcodes <- distinct(elena_bothcodes)
+
+length(unique(jess_bothcosedes$REGISTRY_ID)) #39981
+length(unique(elena_bothcodes$frs_id)) #43517
+
+check_by_join <- full_join(elena_bothcodes, jess_bothcosedes, by = c("frs_id" = "REGISTRY_ID"))
+
+elena_not_jess  <- elena_bothcodes %>%  mutate(check = ifelse(elena_bothcodes$frs_id %in% jess_bothcosedes$REGISTRY_ID, "both", "elena"))
+subset_elena <- elena_not_jess %>% subset(check == "elena")
+jess_not_elens  <- jess_bothcosedes %>%  mutate(check = ifelse(jess_bothcosedes$REGISTRY_ID %in% elena_bothcodes$frs_id, "both", "jess"))
+subset_jess <- jess_not_elens %>%  subset(check == "jess")
+
+```
+
+```{r Creat a Master list}
+list.files()
+
+
+#use the state single file downloaded from https://www.epa.gov/frs/epa-frs-facilities-state-single-file-csv-download by clicking on CA. A single CSV will be downloaded
+single_frs <- read.csv("STATE_SINGLE_CA.CSV")
+
+#filter using determined frs_ids: Elena's file encompasses all FRS, one facility comes from Jess's list (is this a bug? ask Matt why the facility 110033614774 has NAICS in queried downloads, but does not have it in the upload whole files)
+
+Master <- single_frs %>%  filter(REGISTRY_ID %in% elena_not_jess$frs_id | REGISTRY_ID == 110033614774)
+
+names(Master)
+Master <- clean_names(Master)
+unique(Master$federal_facility_code)
+
+##Master_tribalLend <- Master %>%  filter(tribal_land_code == "Yes")
+#Master_mexicoBorder <- Master %>%  filter(us_mexico_border_ind == "Yes")
+
+#Master <- Master %>% filter(federal_facility_code != "Yes") #this is a file with all except federal
+#Master <- Master %>%  filter(tribal_land_code != "Yes")
+
+#2-digit HUC first-level (region)
+#4-digit HUC second-level (subregion)
+#6-digit HUC third-level (accounting unit)
+#8-digit HUC fourth-level (cataloguing unit)
+#10-digit HUC fifth-level (watershed)
+#12-digit HUC sixth-level (subwatershed) 
+
+names(Master)
+
+Master <- Master [,c(2:4, 6:7, 9, 12:16, 18,19,21,23,25:27,32:34)]
+#Master_1 <- Master %>%  filter(naics_codes == "" & sic_codes == "") #CA-single file does not have NAICS code that appear on the file from ZIP, why?
+vis_miss(Master, warn_large_data = F)
+```
+
+
+```{r}
+Master <- Master %>%  mutate_all(na_if,"")
+vis_miss(Master, warn_large_data = F)
+
+
+Master$primary_name <- str_to_title(Master$primary_name)
+Master$location_address <- str_to_title(Master$location_address)
+Master$city_name <- str_to_title(Master$city_name)
+Master$county_name <- str_to_title(Master$county_name)
+
+Master_by_EG <- distinct(Master)
+write.csv(Master_by_EG, "Master_by_EG.csv")
+
+Master_by_JR <- read.csv("Master_by_JR.csv")
+compare  <- Master_by_JR %>%  mutate(check = ifelse(Master_by_JR$RegistryID %in% Master_by_EG$registry_id, "both", "jess"))
+table(compare$check)
+
+
+```
+
