@@ -1,0 +1,131 @@
+---
+title: 'CERS raw files: clean, filter'
+author: "Elena"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+#CERS from raw files by waterboard
+```{r Function to clean table from CERS}
+
+cleanCERSID <- function(df){
+  df$CERSID <- as.double(df$CERSID) #will turn into NA strings that are not numbers
+  df[, 1][df[, 1] == 0] <- NA
+  drop_na(df, CERSID) #drop all CERS ID with NAs 
+  filter(df, CERSID > 9999999) #there is 8 digits in CERS ID
+}
+```
+## Clean up the messy files from waterboard
+```{r Clean up files from Water Board}
+
+CERS_1of10_Aug_2022 <- read_excel("CERS_1of10_Aug_2022.xlsx")
+CERS1 <- cleanCERSID(CERS_1of10_Aug_2022)
+summary(CERS1$CERSID)
+write_csv(CERS1, "CERS1_RCleaned.csv" )
+remove(CERS_1of10_Aug_2022)
+
+CERS_2of10_Aug_2022 <- read_excel("CERS_2of10_Aug_2022.xlsx")
+CERS2 <- cleanCERSID(CERS_2of10_Aug_2022)
+summary(CERS2$CERSID)
+write_csv(CERS2, "CERS2_RCleaned.csv")
+remove(CERS_2of10_Aug_2022)
+
+CERS_3of10_Aug_2022 <- read_excel("CERS_3of10_Aug_2022.xlsx")
+CERS3 <- cleanCERSID(CERS_3of10_Aug_2022)
+summary(CERS3$CERSID)
+write_csv(CERS3, "CERS3_RCleaned.csv")
+rm(CERS_3of10_Aug_2022,CERS3)
+
+CERS_4of10_Aug_2022 <- read_excel("CERS_4of10_Aug_2022.xlsx")
+CERS4 <- cleanCERSID(CERS_4of10_Aug_2022)
+summary(CERS4$CERSID)
+write_csv(CERS4, "CERS4_RCleaned.csv")
+rm(CERS_4of10_Aug_2022)
+
+CERS_5of10_Aug_2022 <- read_excel("CERS_5of10_Aug_2022.xlsx")
+CERS5 <- cleanCERSID(CERS_5of10_Aug_2022)
+summary(CERS5$CERSID)
+write_csv(CERS5, "CERS5_RCleaned.csv")
+rm(CERS_5of10_Aug_2022)
+
+
+CERS_6of10_Aug_2022 <- read_excel("CERS_6of10_Aug_2022.xlsx")
+CERS6 <- cleanCERSID(CERS_6of10_Aug_2022)
+summary(CERS6$CERSID)
+write_csv(CERS6, "CERS6_RCleaned.csv")
+rm(CERS_6of10_Aug_2022)
+
+
+CERS_7of10_Aug_2022 <- read_excel("CERS_7of10_Aug_2022.xlsx")
+CERS7 <- cleanCERSID(CERS_7of10_Aug_2022)
+summary(CERS7$CERSID)
+write_csv(CERS7, "CERS7_RCleaned.csv")
+rm(CERS_7of10_Aug_2022)
+
+CERS_8of10_Aug_2022 <- read_excel("CERS_8of10_Aug_2022.xlsx")
+CERS8 <- cleanCERSID(CERS_8of10_Aug_2022)
+summary(CERS8$CERSID)
+write_csv(CERS8, "CERS8_RCleaned.csv")
+rm(CERS_8of10_Aug_2022)
+
+CERS_9of10_Aug_2022 <- read_excel("CERS_9of10_Aug_2022.xlsx")
+CERS9 <- cleanCERSID(CERS_9of10_Aug_2022)
+summary(CERS9$CERSID)
+write_csv(CERS9, "CERS9_RCleaned.csv")
+rm(CERS_9of10_Aug_2022)
+
+CERS_10of10_Aug_2022 <- read_excel("CERS_10of10_Aug_2022.xlsx")
+CERS10 <- cleanCERSID(CERS_10of10_Aug_2022)
+summary(CERS10$CERSID)
+write_csv(CERS10, "CERS10_RCleaned.csv")
+rm(CERS_10of10_Aug_2022)
+```
+
+##Bind cleaned files together
+```{r Bind all cleaned CERS Files}
+fileslist <- list.files(pattern = ".csv") 
+dfList <- lapply(fileslist, function(f) {
+                    df <- read.csv(f, stringsAsFactors=FALSE)
+                    df <- df[,c(1:84)] #select only columns that have headings
+                 })
+
+finaldf <- do.call(rbind, dfList)
+write.csv(finaldf, "CERS_binded_from_original.csv")
+```
+
+
+```{r Filter CERS file}
+CERS_waterboard_full <- read.csv("Cleaned Data/CERS_binded_from_original.csv") #created in the chunk above.
+CERS_waterboard_full$NAICSCode <- as.double(CERS_waterboard_full$NAICSCode)
+CERS_waterboard_full$SICCode <- as.double(CERS_waterboard_full$SICCode)
+CERS_waterboard_full <- CERS_waterboard_full %>% 
+  select("CERSID","BusinessName","SiteAddress", "City", "ZipCode", "NAICSCode", "SICCode", "ChemicalName", "CommonName", "CASNumber", "MaximumDailyAmount", "HMType", "Unit", "PhysicalState")
+
+CERS_bothNA <- CERS_waterboard_full %>%  
+  filter(is.na(NAICSCode) & is.na(SICCode))
+write.csv(CERS_bothNA, "verify with FRS_empty codes.csv") # NAICS and SIC codes are absent. Needs manual verification
+
+CERS_NAICS <- CERS_waterboard_full %>%  
+  filter(!is.na(NAICSCode)) # 519838 lines
+
+CERS_SIC <-CERS_waterboard_full %>%  
+  filter(!is.na(SICCode) & is.na(NAICSCode))  #618750 lines
+# If facility has both SIC and NAICS, it will be in CERS_NAICS
+# If facility has only SIC, it will be in CERS_SIC
+
+CERS_NAICS <- CERS_NAICS %>% filter(grepl("^31",NAICSCode) | grepl("^32", NAICSCode)| grepl("^33", NAICSCode))
+CERS_NAICS <- CERS_NAICS %>% filter(!NAICSCode %in% c(311, 3111,31111, 311111, 311119, 3112, 31121, 311211, 311212, 311213, 31122, 311221, 311224, 311225, 31123, 311230, 3113, 31131, 311313, 311314, 31134, 311340, 31135, 311351, 311352, 3114, 31141, 311411, 311412, 31142, 311421, 311422, 311423, 3115, 31151, 311511, 311512, 311513, 311514, 31152, 311520, 3116, 31161, 311611, 311612, 311613, 311615, 3117, 31171, 311710, 3118, 31181, 311811, 311812, 311813, 31182, 311821, 311824, 31183, 311830, 3119, 31191, 311911, 311919, 31192, 311920, 31193, 311930, 31194, 311941, 311942, 31199, 311991, 311999, 312, 3121, 31211, 312111, 312112, 312113, 31212, 312120, 31213, 312130, 31214, 312140, 32312, 323120, 3253, 32532, 325320, 325412, 325413, 325414, 3391, 33911, 339112, 339113, 339114, 339116)) #117681 lines
+
+CERS_SIC <- CERS_SIC %>% 
+  filter(grepl("^2", SICCode)| grepl("^3", SICCode))
+CERS_SIC <- CERS_SIC %>% 
+  filter(!SICCode %in% c(2011, 2013, 2015, 2021, 2022, 2023, 2024, 2026, 2032, 2033, 2034, 2035, 2037, 2038, 2041, 2043, 2044, 2045, 2046, 2047, 2048, 2051, 2052, 2053, 2061, 2062, 2063, 2064, 2066, 2067, 2068, 2074, 2075, 2076, 2077, 2079, 2082, 2083, 2084, 2085, 2086, 2087, 2091, 2092, 2095, 2096, 2097, 2098, 2099, 2499, 2599, 2789, 2791, 2796, 2834, 2835, 2836, 2879, 2899, 3069, 3089, 3821, 3829, 3841, 3842, 3843, 3851, 2411, 2711, 2721, 2731, 2741, 2771, 3652, 3721, 3732,211,212,213,214,219,241,251,252,253,254,259,272,273,279,291)) #44250
+
+length(unique(CERS_SIC$BusinessName)) #2924 unique facilities
+length(unique(CERS_NAICS$BusinessName)) #3387 unique facilities
+
+CERS_filtered <- rbind(CERS_SIC, CERS_NAICS) %>% 
+  distinct()
+
+write.csv(CERS_filtered, "CERS_filtered by NAICS-SIC.csv")
+```
