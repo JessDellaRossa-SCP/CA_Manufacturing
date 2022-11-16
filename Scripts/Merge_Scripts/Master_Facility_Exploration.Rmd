@@ -8,35 +8,129 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(knitr)
+library(stringr)
+library(esquisse)
 knitr::opts_chunk$set(echo = TRUE)
 opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
+rm(list = ls())
 ```
 
-## R Markdown
-```{r}
-master <- read.csv("Master_Facility_FINAL.csv")
 
+```{r}
+master <- read.csv("Master_Facility_FINAL_v2.csv")
+```
+
+```{r}
 naics <- master %>% 
   count(NAICS_CODES) %>% 
   arrange(desc(n))
 ```
+```{r}
+sic <- master %>% 
+  count(SIC_CODES) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+SICs_needed <-  ifelse(master$NAICS_CODES == "", master$SIC_CODES, "")
+```
+
+```{r}
+sic_separated <- str_split(SICs_needed,"\\,\\s" )
+sic_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= sic_separated,SIMPLIFY = FALSE)
+
+sic_individual <- do.call(rbind,sic_sep)
+sic_counted <- sic_individual %>% 
+  count(code) %>% 
+  arrange(desc(n))
+```
+
 
 ```{r}
 unique <- as.character(naics$NAICS_CODES)
-unique <- paste0(unique, collapse=", ")
-unique
+#unique <- paste0(unique, collapse=", ") #this gets rid of "the quotes, but we want this to count NAICS.
+```
+
+```{r}
+naics_separated <- str_split(master$NAICS_CODES,"\\,\\s" )
+naics_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= naics_separated,SIMPLIFY = FALSE)
+
+head(naics_sep[[1]])
+head(naics_separated)
+
+naics_individual <- do.call(rbind,naics_sep)
+
+naics_counted <- naics_individual %>% 
+  count(code) %>% 
+  arrange(desc(n))
+
+```
+
+```{r}
+count_each <- unique %>% 
+  count(NAICS_CODES) %>% 
+  arrange(desc(n))
 ```
 
 
 ```{r}
-write.csv(naics, "~\\DTSC\\Manufacturing_Projects\\csv\\naics.csv", row.names=FALSE) 
+#write.csv(naics, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_counted.csv", row.names=FALSE) 
+#write.csv(naics_counted, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_counted.csv", row.names=FALSE) 
+#write.csv(sic_counted, "~\\DTSC\\Manufacturing_Projects\\csv\\sic_counted.csv", row.names=FALSE)
+```
+
+```{r}
+#Group NAICS categories - take the first 3 digits from NAICS codes to see how many.
+naics_individual$groups <- naics_individual$code %>% 
+  str_sub(start = 1, end = 3)
+  
+
+naics_groups <- naics_individual %>% 
+  filter(grepl("^31", code) | grepl("^32", code)| grepl("^33", code)) %>% 
+  count(groups) %>% 
+  arrange(desc(n))
+
+#esquisser(naics_groups)
+
+title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
+
+ggplot(naics_groups) +
+ aes(x = groups, y = n, fill = groups) +
+ geom_col() +
+ scale_fill_manual(values = c(`311` = "#F8766D", 
+`312` = "#E98141", `313` = "#DA8C15", `314` = "#C69600", `315` = "#ACA000", `316` = "#93AA00", `321` = "#58B016", 
+`322` = "#1DB62C", `323` = "#00BB4C", `324` = "#00BE75", `325` = "#00C19F", `326` = "#00BDBA", `327` = "#00BAD5", 
+`331` = "#13B3E8", `332` = "#3AA7F3", `333` = "#619CFF", `334` = "#918BFD", `335` = "#C27AFB", `336` = "#E26EEF", 
+`337` = "#F067D9", `339` = "#FF61C3")) +
+ labs(x = "NAICS 3 Digit Group", y = "Count", title = "NAICS Groups Count") +
+ theme_minimal() + title + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 
 ```{r}
-th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
+#Group NAICS categories - take the first 3 digits from NAICS codes to see how many.
+naics_individual$groups4 <- naics_individual$code %>% 
+  str_sub(start = 1, end = 4)
+  
 
-plot1 <- ggplot(naics, aes(x=NAICS_CODES)) + geom_boxplot() +th
-plot1
+naics_groups4 <- naics_individual %>% 
+  filter(grepl("^31", code) | grepl("^32", code)| grepl("^33", code)) %>% 
+  count(groups4) %>% 
+  arrange(desc(n))
+
+#esquisser(naics_groups4)
+
+ggplot(naics_groups4) +
+ aes(x = groups4, y = n) +
+ geom_col(fill = "#112446") +
+ theme_minimal() + title + 
+  labs(x = "NAICS 3 Digit Group", y = "Count", title = "NAICS Groups Count") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+
 ```
+
 
