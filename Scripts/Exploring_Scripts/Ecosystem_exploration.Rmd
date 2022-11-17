@@ -77,31 +77,57 @@ ggplot(terrestrial_hab) +
 ```
 
 ```{r}
+
+#Background plot to show the different Eco Regions. 
 ggplot(terrestrial_hab) +
  aes(x = Eco_Name, y = TerrHabRank) +
  geom_boxplot(fill = "#5D89AE") +
  theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  + labs(title= "Terrestrial Sensitive Habitats by Eco-Region", x = "Eco-Region", y= "Terrestrial Sensitive Habitat Rank") + title
 ```
-
-
+# Central Valley Coast Ranges, Northern California Coast, Northern California Interior Coast Ranges
+# Klamath Mountains, Northern California Coast Ranges, Southern Cascades
 
 ```{r}
+terr.anova.df <- terrestrial_hab %>% 
+  group_by(Eco_Name) %>% 
+  count(TerrHabRank)
+
 RCBDmodel <- lm(formula = n ~ TerrHabRank + Eco_Name,
-                data = monarch)
+                data = terr.anova.df)
 
 anova(object = RCBDmodel)
 ```
+
 ```{r}
-linear.model1 <- lm(formula = n ~ TerrHabRank, data = monarch)
-anova(object = linear.model1)
+coastal.ranges <- terrestrial_hab %>% 
+  subset(Eco_Name == c("Central Valley Coast Ranges", "Northern California Coast", "Northern California Interior Coast Ranges")) %>% 
+  group_by(Eco_Name) %>% 
+  count(TerrHabRank)
+
+coastal.model <- lm(formula = n ~ TerrHabRank + Eco_Name,
+                data = coastal.ranges)
+
+anova(coastal.model)
+```
+
+```{r}
+mountain.ranges <- terrestrial_hab %>% 
+  subset(Eco_Name == c("Klamath Mountains", "Northern California Coast Ranges", "Southern Cascades")) %>%
+  group_by(Eco_Name) %>% 
+  count(TerrHabRank)
+
+mountain.model <- lm(formula = n ~ TerrHabRank + Eco_Name,
+                data = mountain.ranges)
+
+anova(mountain.model)
 ```
 
 
 
-
 ```{r}
-
+linear.model1 <- lm(formula = n ~ TerrHabRank, data = monarch)
+anova(object = linear.model1)
 ```
 
 
@@ -112,9 +138,6 @@ aqua_rank <- aquatic_hab %>%
   arrange(AqHabRank)
 
 #esquisser(aquatic_hab)
-
-
-
 
 
 ggplot(aquatic_hab) +
