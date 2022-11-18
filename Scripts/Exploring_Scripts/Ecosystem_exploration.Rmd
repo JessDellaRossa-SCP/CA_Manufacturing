@@ -49,14 +49,6 @@ regions<- terrestrial_hab %>%
 ```
 
 
-```{r}
-#new dataframe with Monarch info, Eco_Name region and count per rank for each factor.
-monarch <- terrestrial_hab %>% 
-  group_by(Eco_Name, Monarch) %>% 
-  count(TerrHabRank)
-#pander(monarch)
-
-```
 
 ```{r}
 ggplot(terrestrial_hab) +
@@ -85,50 +77,6 @@ ggplot(terrestrial_hab) +
  theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  + labs(title= "Terrestrial Sensitive Habitats by Eco-Region", x = "Eco-Region", y= "Terrestrial Sensitive Habitat Rank") + title
 ```
-# Central Valley Coast Ranges, Northern California Coast, Northern California Interior Coast Ranges
-# Klamath Mountains, Northern California Coast Ranges, Southern Cascades
-
-```{r}
-terr.anova.df <- terrestrial_hab %>% 
-  group_by(Eco_Name) %>% 
-  count(TerrHabRank)
-
-RCBDmodel <- lm(formula = n ~ TerrHabRank + Eco_Name,
-                data = terr.anova.df)
-
-anova(object = RCBDmodel)
-```
-
-```{r}
-coastal.ranges <- terrestrial_hab %>% 
-  subset(Eco_Name == c("Central Valley Coast Ranges", "Northern California Coast", "Northern California Interior Coast Ranges")) %>% 
-  group_by(Eco_Name) %>% 
-  count(TerrHabRank)
-
-coastal.model <- lm(formula = n ~ TerrHabRank + Eco_Name,
-                data = coastal.ranges)
-
-anova(coastal.model)
-```
-
-```{r}
-mountain.ranges <- terrestrial_hab %>% 
-  subset(Eco_Name == c("Klamath Mountains", "Northern California Coast Ranges", "Southern Cascades")) %>%
-  group_by(Eco_Name) %>% 
-  count(TerrHabRank)
-
-mountain.model <- lm(formula = n ~ TerrHabRank + Eco_Name,
-                data = mountain.ranges)
-
-anova(mountain.model)
-```
-
-
-
-```{r}
-linear.model1 <- lm(formula = n ~ TerrHabRank, data = monarch)
-anova(object = linear.model1)
-```
 
 
 ```{r}
@@ -137,8 +85,6 @@ aqua_rank <- aquatic_hab %>%
   count(AqHabRank) %>% 
   arrange(AqHabRank)
 
-#esquisser(aquatic_hab)
-
 
 ggplot(aquatic_hab) +
  aes(x = AqHabRank, fill = Riparian) +
@@ -146,23 +92,35 @@ ggplot(aquatic_hab) +
  scale_fill_hue(direction = 1) +
  theme_minimal()+ labs(title= "Count of Aquatic Sensitive Habitats by Rank", x = "Aquatic Sensitive Habitat Rank", y= "Count of HUC 12") + title
 
+```
 
+```{r}
 ggplot(aquatic_hab) +
  aes(x = AqHabRank, fill = Lakes) +
  geom_histogram(bins = 30L) +
  scale_fill_hue(direction = 1) +
  theme_minimal()+ labs(title= "Count of Aquatic Sensitive Habitats by Rank", x = "Aquatic Sensitive Habitat Rank", y= "Count of HUC 12") + title
+```
 
-
+```{r}
 ggplot(aquatic_hab) +
  aes(x = AqHabRank) +
  geom_histogram(bins = 30L, fill = "#5D89AE") +
  theme_bw() + labs(title= "Count of Aquatic Sensitive Habitats by Rank", x = "Aquatic Sensitive Habitat Rank", y= "Count of HUC 12") + title
-
 ```
 
 ```{r}
 
-```
+aqua_rankings <- aquatic_hab %>% 
+  group_by(AqHabRank) %>% 
+  mutate(Riparian_Count = sum(Riparian == "Y"))
+  
 
+         
+         
+         aqua_rank <- aquatic_hab %>% 
+  count(AqHabRank) %>% 
+  arrange(AqHabRank)
+
+```
 
