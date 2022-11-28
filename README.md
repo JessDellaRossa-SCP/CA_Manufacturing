@@ -11,13 +11,13 @@
 * Week 7: 
   * Complete GitHub set up 
   * Set up data folders
-   ### Current Week 8  
 * Week 8: Statistical analysis of significant habitats
   * Plots for significant habitats
 * Week 9: Create static map with one other variable
   * See if manipulation is possible
 * Week 10: Shiny App Exploration
-  * Attend Tara's Presentation on 11/23
+  * Attend Tara's Presentation on 11/23 - this was cancelled due to the strike :(
+   ### Current Week 11
 * Week 11: Final data analysis for spatial exploration in 2023
 
 
@@ -26,7 +26,7 @@
   * due 11/29/2022
 * Elena out 11/30 - 12/12
   * Statistical analysis and plotting of significant habitats - *Jess*
-  * due 12/1
+  * due 12/1 - complete
 * Jess - school finals 12/2 - 12/7
 * Geocode facility addresses to coordinates for missing coordinates - *Elena*
   * due 12/30/2022
