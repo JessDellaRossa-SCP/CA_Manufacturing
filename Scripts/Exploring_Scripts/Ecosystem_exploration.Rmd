@@ -43,9 +43,9 @@ regions<- terrestrial_hab %>%
   group_by(Eco_Name) %>% 
   count(Eco_Name)
 
-#pander(terr_rank)
-#pander(terr_summary)
-#pander(regions)
+pander(terr_rank)
+pander(terr_summary)
+pander(regions)
 ```
 
 
@@ -59,8 +59,6 @@ ggplot(terrestrial_hab) +
 
 
 ```{r}
-#esquisser(terrestrial_hab)
-
 ggplot(terrestrial_hab) +
  aes(x = TerrHabRank) +
  geom_histogram(bins = 30L, fill = "#5D89AE") +
@@ -118,7 +116,7 @@ aqua_rankings <- aquatic_hab %>%
 
          
          
-         aqua_rank <- aquatic_hab %>% 
+  aqua_rank <- aquatic_hab %>% 
   count(AqHabRank) %>% 
   arrange(AqHabRank)
 
