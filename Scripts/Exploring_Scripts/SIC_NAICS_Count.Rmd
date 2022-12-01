@@ -1,0 +1,74 @@
+---
+title: "SIC_NAICS_Counting"
+author: "Jess"
+date: '2022-12-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+library(stringr)
+library(esquisse)
+knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
+rm(list = ls())
+```
+
+
+```{r}
+master <- read.csv("Master_Facility_FINAL_v2.csv")
+```
+
+```{r}
+naics <- master %>% 
+  count(NAICS_CODES) %>% 
+  arrange(desc(n))
+```
+```{r}
+sic <- master %>% 
+  count(SIC_CODES) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+SICs_needed <-  ifelse(master$NAICS_CODES == "", master$SIC_CODES, "")
+```
+
+```{r}
+sic_separated <- str_split(SICs_needed,"\\,\\s" )
+sic_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= sic_separated,SIMPLIFY = FALSE)
+
+sic_individual <- do.call(rbind,sic_sep)
+sic_counted <- sic_individual %>% 
+  count(code) %>% 
+  arrange(desc(n))
+```
+
+
+```{r}
+unique <- as.character(naics$NAICS_CODES)
+#unique <- paste0(unique, collapse=", ") #this gets rid of "the quotes, but we want this to count NAICS.
+```
+
+```{r}
+naics_separated <- str_split(master$NAICS_CODES,"\\,\\s" )
+naics_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= naics_separated,SIMPLIFY = FALSE)
+
+head(naics_sep[[1]])
+head(naics_separated)
+
+naics_individual <- do.call(rbind,naics_sep)
+
+naics_counted <- naics_individual %>% 
+  count(code) %>% 
+  arrange(desc(n))
+
+```
+
+
+```{r}
+#write.csv(naics_individual, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_groups.csv", row.names=FALSE)
+#write.csv(naics_counted, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_counted.csv", row.names=FALSE) 
+#write.csv(sic_counted, "~\\DTSC\\Manufacturing_Projects\\csv\\sic_counted.csv", row.names=FALSE)
+```

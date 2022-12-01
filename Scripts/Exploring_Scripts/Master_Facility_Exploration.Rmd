@@ -15,69 +15,13 @@ opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
 rm(list = ls())
 ```
 
-
 ```{r}
-master <- read.csv("Master_Facility_FINAL_v2.csv")
-```
-
-```{r}
-naics <- master %>% 
-  count(NAICS_CODES) %>% 
-  arrange(desc(n))
-```
-```{r}
-sic <- master %>% 
-  count(SIC_CODES) %>% 
-  arrange(desc(n))
-```
-
-```{r}
-SICs_needed <-  ifelse(master$NAICS_CODES == "", master$SIC_CODES, "")
-```
-
-```{r}
-sic_separated <- str_split(SICs_needed,"\\,\\s" )
-sic_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= sic_separated,SIMPLIFY = FALSE)
-
-sic_individual <- do.call(rbind,sic_sep)
-sic_counted <- sic_individual %>% 
-  count(code) %>% 
-  arrange(desc(n))
+naics_individual <- read.csv("naics_groups.csv")
+naics_counted <- read.csv("naics_counted.csv") 
+sic_counted <- read.csv("sic_counted.csv")
 ```
 
 
-```{r}
-unique <- as.character(naics$NAICS_CODES)
-#unique <- paste0(unique, collapse=", ") #this gets rid of "the quotes, but we want this to count NAICS.
-```
-
-```{r}
-naics_separated <- str_split(master$NAICS_CODES,"\\,\\s" )
-naics_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= naics_separated,SIMPLIFY = FALSE)
-
-head(naics_sep[[1]])
-head(naics_separated)
-
-naics_individual <- do.call(rbind,naics_sep)
-
-naics_counted <- naics_individual %>% 
-  count(code) %>% 
-  arrange(desc(n))
-
-```
-
-```{r}
-count_each <- unique %>% 
-  count(NAICS_CODES) %>% 
-  arrange(desc(n))
-```
-
-
-```{r}
-#write.csv(naics, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_counted.csv", row.names=FALSE) 
-#write.csv(naics_counted, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_counted.csv", row.names=FALSE) 
-#write.csv(sic_counted, "~\\DTSC\\Manufacturing_Projects\\csv\\sic_counted.csv", row.names=FALSE)
-```
 
 ```{r}
 #Group NAICS categories - take the first 3 digits from NAICS codes to see how many.
@@ -119,6 +63,9 @@ naics_groups4 <- naics_individual %>%
   arrange(desc(n))
 
 #esquisser(naics_groups4)
+
+title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
+th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
 
 ggplot(naics_groups4) +
  aes(x = groups4, y = n) +
