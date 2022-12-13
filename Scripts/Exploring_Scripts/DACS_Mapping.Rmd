@@ -25,6 +25,7 @@ library(rgdal)
 
 ```{r}
 tracts <- st_read("CES4_Final_Shapefile.shp")
+st_crs(tracts)
 ```
 
 ```{r}
@@ -36,6 +37,27 @@ tracts_plot
 ```{r}
 dacs <- st_read("SB535DACgdb_F_2022.gdb")
 ogrListLayers("SB535DACgdb_F_2022.gdb")
+
+tribal <- readOGR("SB535DACgdb_F_2022.gdb", layer="SB535tribalboundaries2022")
+st_crs(tribal)
+dac_tracts <- readOGR("SB535DACgdb_F_2022.gdb", layer="SB535tracts2022")
+st_crs(dac_tracts)
+class(dac_tracts)
+dac_tracts <- st_transform(dac_tracts, st_crs(tribal))
+```
+```{r}
+plot(tribal)
+```
+```{r}
+plot(dac_tracts)
+```
+```{r}
+sb535_plot<-ggplot(data=tracts)+ geom_sf(data=tracts, inherit.aes = FALSE, col="#6f94e2") + th + geom_sf(data=tribal, inherit.aes=FALSE, fill="#2ca25f")
+sb535_plot
+```
+
+
+```{r}
 #https://www.redfoxgis.com/single-post/2015/06/20/how-to-read-an-esri-file-geodatabase-feature-class-in-r
 #https://mgimond.github.io/Spatial/reading-and-writing-spatial-data-in-r.html
 #https://workshops.distancesampling.org/duke-spatial-2015/practicals/process-geodata-2.html
