@@ -19,6 +19,7 @@ library(ncdf4)
 library(tidyr)
 library(plotly)
 library(dplyr)
+library(rgdal)
 ```
 
 
@@ -34,7 +35,10 @@ tracts_plot
 
 ```{r}
 dacs <- st_read("SB535DACgdb_F_2022.gdb")
+ogrListLayers("SB535DACgdb_F_2022.gdb")
 #https://www.redfoxgis.com/single-post/2015/06/20/how-to-read-an-esri-file-geodatabase-feature-class-in-r
+#https://mgimond.github.io/Spatial/reading-and-writing-spatial-data-in-r.html
+#https://workshops.distancesampling.org/duke-spatial-2015/practicals/process-geodata-2.html
 st_layers(dacs)
 ```
 
