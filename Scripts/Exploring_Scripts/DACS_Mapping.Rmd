@@ -1,0 +1,40 @@
+---
+title: "DACS"
+author: "Jess"
+date: '2022-12-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+require(knitr)
+opts_knit$set(root.dir="~/DTSC/Manufacturing_Projects/csv/DACS")
+library(raster)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(lubridate)
+library(ncdf4)
+library(tidyr)
+library(plotly)
+library(dplyr)
+```
+
+
+```{r}
+tracts <- st_read("CES4_Final_Shapefile.shp")
+```
+
+```{r}
+th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
+tracts_plot<-ggplot(data=tracts)+ geom_sf(data=tracts, inherit.aes = FALSE, col="#6f94e2") + th
+tracts_plot
+```
+
+```{r}
+dacs <- st_read("SB535DACgdb_F_2022.gdb")
+#https://www.redfoxgis.com/single-post/2015/06/20/how-to-read-an-esri-file-geodatabase-feature-class-in-r
+st_layers(dacs)
+```
+

@@ -43,9 +43,9 @@ regions<- terrestrial_hab %>%
   group_by(Eco_Name) %>% 
   count(Eco_Name)
 
-pander(terr_rank)
-pander(terr_summary)
-pander(regions)
+#pander(terr_rank)
+#pander(terr_summary)
+#pander(regions)
 ```
 
 
@@ -54,7 +54,7 @@ pander(regions)
 ggplot(terrestrial_hab) +
  aes(x = TerrHabRank) +
  geom_histogram(bins = 30L, fill = "#5D89AE") +
- theme_bw() + labs(title= "Count of Terrestrial Sensitive Habitats by Rank", x = "Terrestrial Sensitive Habitat Rank", y= "Count of Hexes") + title
+ theme_bw() + labs(title= "Count of Terrestrial Significant Habitats by Rank", x = "Terrestrial Significant Habitat Rank", y= "Count of Hexes") + title
 ```
 
 
@@ -63,7 +63,7 @@ ggplot(terrestrial_hab) +
  aes(x = TerrHabRank) +
  geom_histogram(bins = 30L, fill = "#5D89AE") +
  theme_bw() +
- facet_wrap(vars(Eco_Name)) +  labs(title= "Terrestrial Sensitive Habitats Count by Eco-Region", x = "Terrestrial Sensitive Habitat Rank", y= "Count of Terrestrial Hexes") + title
+ facet_wrap(vars(Eco_Name)) +  labs(title= "Terrestrial Significant Habitats Count by Eco-Region", x = "Terrestrial Significant Habitat Rank", y= "Count of Terrestrial Hexes") + title
 ```
 
 ```{r}
@@ -73,7 +73,7 @@ ggplot(terrestrial_hab) +
  aes(x = Eco_Name, y = TerrHabRank) +
  geom_boxplot(fill = "#5D89AE") +
  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  + labs(title= "Terrestrial Sensitive Habitats by Eco-Region", x = "Eco-Region", y= "Terrestrial Sensitive Habitat Rank") + title
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  + labs(title= "Terrestrial Significant Habitats by Eco-Region", x = "Eco-Region", y= "Terrestrial Significant Habitat Rank") + title
 ```
 
 
@@ -88,7 +88,7 @@ ggplot(aquatic_hab) +
  aes(x = AqHabRank, fill = Riparian) +
  geom_histogram(bins = 30L) +
  scale_fill_hue(direction = 1) +
- theme_minimal()+ labs(title= "Count of Aquatic Sensitive Habitats by Rank", x = "Aquatic Sensitive Habitat Rank", y= "Count of HUC 12") + title
+ theme_minimal()+ labs(title= "Count of Aquatic Significant Habitats by Rank", x = "Aquatic Significant Habitat Rank", y= "Count of HUC 12") + title
 
 ```
 
@@ -97,14 +97,14 @@ ggplot(aquatic_hab) +
  aes(x = AqHabRank, fill = Lakes) +
  geom_histogram(bins = 30L) +
  scale_fill_hue(direction = 1) +
- theme_minimal()+ labs(title= "Count of Aquatic Sensitive Habitats by Rank", x = "Aquatic Sensitive Habitat Rank", y= "Count of HUC 12") + title
+ theme_minimal()+ labs(title= "Count of Aquatic Significant Habitats by Rank", x = "Aquatic Significant Habitat Rank", y= "Count of HUC 12") + title
 ```
 
 ```{r}
 ggplot(aquatic_hab) +
  aes(x = AqHabRank) +
  geom_histogram(bins = 30L, fill = "#5D89AE") +
- theme_bw() + labs(title= "Count of Aquatic Sensitive Habitats by Rank", x = "Aquatic Sensitive Habitat Rank", y= "Count of HUC 12") + title
+ theme_bw() + labs(title= "Count of Aquatic Significant Habitats by Rank", x = "Aquatic Significant Habitat Rank", y= "Count of HUC 12") + title
 ```
 
 ```{r}

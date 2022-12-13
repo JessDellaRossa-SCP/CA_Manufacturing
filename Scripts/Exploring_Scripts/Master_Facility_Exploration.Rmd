@@ -16,6 +16,7 @@ rm(list = ls())
 ```
 
 ```{r}
+master <- read.csv("Master_Facility_FINAL_v2.csv")
 naics_individual <- read.csv("naics_groups.csv")
 naics_counted <- read.csv("naics_counted.csv") 
 sic_counted <- read.csv("sic_counted.csv")
@@ -34,7 +35,6 @@ naics_groups <- naics_individual %>%
   count(groups) %>% 
   arrange(desc(n))
 
-#esquisser(naics_groups)
 
 title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
 
@@ -46,8 +46,8 @@ ggplot(naics_groups) +
 `322` = "#1DB62C", `323` = "#00BB4C", `324` = "#00BE75", `325` = "#00C19F", `326` = "#00BDBA", `327` = "#00BAD5", 
 `331` = "#13B3E8", `332` = "#3AA7F3", `333` = "#619CFF", `334` = "#918BFD", `335` = "#C27AFB", `336` = "#E26EEF", 
 `337` = "#F067D9", `339` = "#FF61C3")) +
- labs(x = "NAICS 3 Digit Group", y = "Count", title = "NAICS Groups Count") +
- theme_minimal() + title + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ labs(x = "NAICS 3 Digit Group", y = "Count of Group", title = "NAICS Groups Count") +
+ theme_minimal() + title + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(legend.position = "none")
 ```
 
 
@@ -71,13 +71,17 @@ ggplot(naics_groups4) +
  aes(x = groups4, y = n) +
  geom_col(fill = "#112446") +
  theme_minimal() + title + 
-  labs(x = "NAICS 3 Digit Group", y = "Count", title = "NAICS Groups Count") + 
+  labs(x = "NAICS 4 Digit Group", y = "Count", title = "NAICS Groups Count") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 
 
 
+```
+```{r}
+naics_groups$groups
+write.csv(naics_groups, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_3.csv", row.names=FALSE)
 ```
 
 
