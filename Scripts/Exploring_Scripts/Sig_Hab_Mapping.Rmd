@@ -21,10 +21,73 @@ library(plotly)
 library(dplyr)
 library(rgdal)
 library(ggspatial)
+library(viridis)
+```
+
+```{r}
+#create an outline of California
+stateline<-st_read("cb_2018_us_state_500k.shp")
+st_crs(stateline)
+california<-stateline[which(stateline$NAME=="California"),]
+```
+
+
+The aquatic significant habitat dataset is ds2756.gdb, and the terrestrial significant habitat dataset is ds2721.gdb.
+```{r}
+#This reads in the .gdb and shows the layers so you know which layer to read in. In this case, it doesn't matter. But some other .gdb will have multiple layers.
+aquatic.gdb <- st_read("ds2756.gdb")
+st_layers("ds2756.gdb")
+
+aquatic_lyr <- sf::st_read(dsn = "ds2756.gdb", layer = "ds2756")
+
+terrestrial.gdb <- st_read("ds2721.gdb")
+st_layers("ds2721.gdb")
+
+terrestrial_lyr <- sf::st_read(dsn = "ds2721.gdb", layer = "ds2721")
+```
+```{r}
+head(aquatic_lyr)
+head(terrestrial_lyr)
 ```
 
 
 ```{r}
+#transform the projection the aquatic and terrestrial layers to match `california` with NAD83.
+st_crs(california)
+st_crs(aquatic_lyr)
+aquatic_lyr<- st_transform(aquatic_lyr, st_crs(california))
+```
 
+```{r}
+th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
+title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
+
+plot_aq <-ggplot(data=aquatic_lyr) +geom_sf(aes(fill=AqHabRank), col= NA)+ scale_fill_viridis() + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#f03b20") +th + labs(x=NULL, y=NULL, title="California Aquatic Significant Habitats Ranked 1-5", fill = "Rank")+ title
+plot_aq
+```
+
+```{r}
+subset_aq <- aquatic_lyr %>% 
+  filter(AqHabRank >= 3)
+```
+
+```{r}
+plot_aq_high <-ggplot(data=subset_aq) +geom_sf(aes(fill=AqHabRank), col= NA)+ scale_fill_viridis() + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#f03b20") +th + labs(x=NULL, y=NULL, title="California Aquatic Significant Habitats Ranked 3 -5", fill = "Rank")+ title
+plot_aq_high
+```
+
+```{r}
+plot_tr <-ggplot(data=terrestrial_lyr) +geom_sf(aes(fill=TerrHabRank), col= NA)+ scale_fill_viridis() + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#f03b20") +th + labs(x=NULL, y=NULL, title="California Terrestrial Significant Habitats Ranked 1-5", fill = "Rank")+ title
+plot_tr
+```
+
+```{r}
+subset_tr <- terrestrial_lyr %>% 
+  filter(TerrHabRank >= 3)
+```
+
+```{r}
+plot_tr_high <-ggplot(data=subset_tr) +geom_sf(aes(fill=TerrHabRank), col= NA)+ scale_fill_viridis() + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#f03b20") +th + labs(x=NULL, y=NULL, title="California Terrestrial Significant Habitats Ranked 3-5", fill = "Rank")+ title
+plot_tr_high
 ```
 
