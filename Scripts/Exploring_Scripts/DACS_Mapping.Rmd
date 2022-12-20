@@ -76,8 +76,6 @@ st_crs(dac_tracts)
 
 
 ```{r}
-plot(tribal)
-
 tracts_plot + geom_sf(data=tribal_two, inherit.aes = FALSE, fill="#e6550d")
 ```
 

@@ -1,0 +1,30 @@
+---
+title: "Mapping Significant Habitats"
+author: "Jess"
+date: '2022-12-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+require(knitr)
+opts_knit$set(root.dir="~/DTSC/Manufacturing_Projects/csv/Ecosystems")
+library(raster)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(lubridate)
+library(ncdf4)
+library(tidyr)
+library(plotly)
+library(dplyr)
+library(rgdal)
+library(ggspatial)
+```
+
+
+```{r}
+
+```
+
