@@ -1,0 +1,29 @@
+---
+title: "Map Boxer"
+author: "Jess"
+date: '2022-12-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(rgdal)
+library(ggspatial)
+library(viridis)
+library(mapboxer)
+```
+```{r}
+
+```
+
+https://plotly.com/r/mapbox-county-choropleth/
+https://plotly.com/r/reference/layout/mapbox/
+https://cran.r-project.org/web/packages/mapboxer/vignettes/mapboxer.html
+
+
