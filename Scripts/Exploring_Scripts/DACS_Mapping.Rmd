@@ -20,47 +20,72 @@ library(tidyr)
 library(plotly)
 library(dplyr)
 library(rgdal)
+library(ggspatial)
 ```
 
-
+#For this project, we want to use NAD83 projection
 ```{r}
 tracts <- st_read("CES4_Final_Shapefile.shp")
+sb535_tracts <- read.csv("Sb535.tracts.csv")
 st_crs(tracts)
 ```
 
+
+```{r}
+subset_sb535 <- tracts %>% 
+  filter(Tract %in% sb535_tracts$Census.Tract)
+
+class(subset_sb535)
+```
+
+```{r}
+#create an outline of California
+stateline<-st_read("cb_2018_us_state_500k.shp")
+st_crs(stateline)
+california<-stateline[which(stateline$NAME=="California"),]
+```
+
+
 ```{r}
 th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
-tracts_plot<-ggplot(data=tracts)+ geom_sf(data=tracts, inherit.aes = FALSE, col="#6f94e2") + th
+
+#This shows the census tracts for California
+tracts_plot<-ggplot(data=subset_sb535) +geom_sf(data=subset_sb535, inherit.aes = FALSE, fill="#6f94e2") + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#2ca25f") + th
 tracts_plot
 ```
 
-```{r}
-dacs <- st_read("SB535DACgdb_F_2022.gdb")
-ogrListLayers("SB535DACgdb_F_2022.gdb")
 
+```{r}
+#this reads in the data set
+dacs <- st_read("SB535DACgdb_F_2022.gdb")
+#this shows us the layers with their projections of the dataset
+st_layers("SB535DACgdb_F_2022.gdb")
+
+#create a spatial layer for tribal boundaries
 tribal <- readOGR("SB535DACgdb_F_2022.gdb", layer="SB535tribalboundaries2022")
-st_crs(tribal)
+tribal_two <- sf::st_read(dsn = "SB535DACgdb_F_2022.gdb", layer = "SB535tribalboundaries2022")
+
+#create a spatial layer for DACs data. We aren't using this data.
 dac_tracts <- readOGR("SB535DACgdb_F_2022.gdb", layer="SB535tracts2022")
+
+#transform the projection of dacs to match tribal and tracts. We aren't using this dac_tracts data, but this is how you can change the crs.
+dac_tracts <- spTransform(dac_tracts, crs(tribal))
 st_crs(dac_tracts)
-class(dac_tracts)
-dac_tracts <- st_transform(dac_tracts, st_crs(tribal))
 ```
+
+
+
 ```{r}
 plot(tribal)
+
+tracts_plot + geom_sf(data=tribal_two, inherit.aes = FALSE, fill="#e6550d")
 ```
-```{r}
-plot(dac_tracts)
-```
-```{r}
-sb535_plot<-ggplot(data=tracts)+ geom_sf(data=tracts, inherit.aes = FALSE, col="#6f94e2") + th + geom_sf(data=tribal, inherit.aes=FALSE, fill="#2ca25f")
-sb535_plot
-```
+
 
 
 ```{r}
 #https://www.redfoxgis.com/single-post/2015/06/20/how-to-read-an-esri-file-geodatabase-feature-class-in-r
 #https://mgimond.github.io/Spatial/reading-and-writing-spatial-data-in-r.html
 #https://workshops.distancesampling.org/duke-spatial-2015/practicals/process-geodata-2.html
-st_layers(dacs)
 ```
 
