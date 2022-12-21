@@ -17,13 +17,18 @@ library(rgdal)
 library(ggspatial)
 library(viridis)
 library(mapboxer)
+library(leaflet)
 ```
+
+
 ```{r}
-
+basemap <- leaflet() %>% 
+  setView(lat = 36.778259, lng = -119.417931, zoom = 5) %>%
+  addTiles()
+basemap
 ```
 
-https://plotly.com/r/mapbox-county-choropleth/
-https://plotly.com/r/reference/layout/mapbox/
-https://cran.r-project.org/web/packages/mapboxer/vignettes/mapboxer.html
+https://rstudio.github.io/leaflet/showhide.html
+
 
 
