@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+require(knitr)
 opts_knit$set(root.dir="~/DTSC/Manufacturing_Projects/csv/Ecosystems")
 rm(list=ls())
 library(tidyverse)
@@ -19,7 +20,6 @@ library(ggspatial)
 library(viridis)
 library(mapboxer)
 library(leaflet)
-library(knitr)
 ```
 
 ```{r}
@@ -33,13 +33,35 @@ terrestrial.gdb <- st_read("ds2721.gdb")
 st_layers("ds2721.gdb")
 
 terrestrial_lyr <- sf::st_read(dsn = "ds2721.gdb", layer = "ds2721")
+
+#clear these out of your environment to take up less space
+rm(terrestrial.gdb)
+rm(aquatic.gdb)
 ```
+
+```{r}
+#Read in the census tracts and the DACs from sb535. Create a subset shp of the sb535 DACs.
+tracts <- st_read("CES4_Final_Shapefile.shp")
+sb535_tracts <- read.csv("Sb535.tracts.csv")
+subset_sb535 <- tracts %>% 
+  filter(Tract %in% sb535_tracts$Census.Tract)
+```
+
+```{r}
+#this reads in the data set for tribal land within the sb535 gdb.
+dacs <- st_read("SB535DACgdb_F_2022.gdb")
+#this shows us the layers with their projections of the dataset
+st_layers("SB535DACgdb_F_2022.gdb")
+
+#create a spatial layer for tribal boundaries
+tribal<- sf::st_read(dsn = "SB535DACgdb_F_2022.gdb", layer = "SB535tribalboundaries2022")
+```
+
 
 ```{r}
 basemap <- leaflet() %>% 
   setView(lat = 36.778259, lng = -119.417931, zoom = 5) %>%
   addTiles()
-basemap
 ```
 
 https://rstudio.github.io/leaflet/showhide.html
@@ -48,37 +70,104 @@ https://rstudio.github.io/leaflet/
 
 
 ```{r}
-class(aquatic_lyr)
+class(tribal)
 aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
 terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
-
-aq5 <- colorBin("viridis", domain = aquatic_lyr$AqHabRank, bins = 0:5)
-tr5 <- colorBin("magma", domain = aquatic_lyr$TerrHabRank, bins = 0:5)
+subset_sb535 <- st_transform(subset_sb535, CRS("+proj=longlat +datum=WGS84"))
+tribal <- st_transform(tribal, CRS("+proj=longlat +datum=WGS84"))
 ```
 
 
 ```{r}
-basemap %>% 
+aq5 <- colorNumeric("viridis", domain = aquatic_lyr$AqHabRank)
+tr5 <- colorNumeric("magma", domain = aquatic_lyr$TerrHabRank)
+tribe_col <- colorFactor("#de2d26", domain=tribal$GEOID)
+dacs_col <- colorFactor("#006837", domain = subset_sb535$Tract)
+```
+
+
+
+```{r}
+habitat_map <- basemap %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
   addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
   addTiles(group = terrestrial_lyr$TerrHabRank, "Terrestrial Significant Habitat") %>% 
   addPolygons(data=aquatic_lyr, 
               fillColor= ~aq5(AqHabRank),
               fillOpacity =.7,
-              color= NA) %>% 
+              color= NA,
+              group = "Aquatic Significant Habitat") %>% 
   addPolygons(data=terrestrial_lyr,
               fillColor= ~tr5(TerrHabRank),
               fillOpacity =.7,
-              color = NA) %>% 
+              color = NA,
+              group = "Terrestrial Significant Habitat") %>% 
+  addLegend(position = "bottomright", 
+            pal = aq5, 
+            title = "Aquatic Significant Habitat Rank", 
+            values = aquatic_lyr$AqHabRank, 
+            group = "Aquatic Significant Habitat",
+            opacity = 1) %>% 
+  addLegend(position = "bottomright", 
+            pal = tr5, 
+            title = "Terrestrial Significant Habitat Rank", 
+            values = terrestrial_lyr$TerrHabRank, 
+            group = "Terrestrial Significant Habitat",
+            opacity = 1) %>% 
   addLayersControl(
-    baseGroups = c("Aquatic Significant Habitat", "Terrestrial Significant Habitat"),
+    baseGroups = "Terrain",
+    overlayGroups = c("Aquatic Significant Habitat", "Terrestrial Significant Habitat"),
     options = layersControlOptions(collapsed=FALSE)
   )
-  
+#habitat_map
+```
+
+
+```{r}
+dac_label <- sprintf(
+  "<h2>%s</h2>",
+  subset_sb535$ApproxLoc) %>% 
+  lapply(htmltools::HTML)
+
+tribal_label <- sprintf(
+  "<h2>%s</h2>",
+  tribal$Name) %>% 
+  lapply(htmltools::HTML)
+
 ```
 
 ```{r}
-basemap %>% 
-     addLegend(pal = aq5, values = ~AqHabRank, opacity = 0.7, 
-            title = NULL, position = "bottomright")
+map_535 <- basemap %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+  addTiles(group = subset_sb535$Tract, "SB 535 DACs") %>% 
+  addTiles(group = tribal$GEOID, "Federally Recognized Tribes") %>% 
+  addPolygons(data=tribal,
+              fillColor= ~tribe_col(GEOID),
+              fillOpacity = 0.9,
+              color= "#252525",
+              weight=1,
+              group = "Federally Recognized Tribes",
+              label = tribal_label,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal",padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>% 
+  addPolygons(data=subset_sb535,
+              fillColor=~dacs_col(Tract),
+              fillOpacity = 0.9,
+              color = "#252525",
+              weight =1,
+              group = "SB 535 DACs",
+              label = dac_label,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal",padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>% 
+  addLayersControl(
+    baseGroups = "Terrain",
+    overlayGroups = c("SB 535 DACs", "Federally Recognized Tribes"),
+    options = layersControlOptions(collapsed=FALSE)
+              )
 ```
+
 
