@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir="~/DTSC/Manufacturing_Projects/csv/Ecosystems")
 rm(list=ls())
 library(tidyverse)
 library(sf)
@@ -18,8 +19,21 @@ library(ggspatial)
 library(viridis)
 library(mapboxer)
 library(leaflet)
+library(knitr)
 ```
 
+```{r}
+#This reads in the .gdb and shows the layers so you know which layer to read in. In this case, it doesn't matter. But some other .gdb will have multiple layers.
+aquatic.gdb <- st_read("ds2756.gdb")
+st_layers("ds2756.gdb")
+
+aquatic_lyr <- sf::st_read(dsn = "ds2756.gdb", layer = "ds2756")
+
+terrestrial.gdb <- st_read("ds2721.gdb")
+st_layers("ds2721.gdb")
+
+terrestrial_lyr <- sf::st_read(dsn = "ds2721.gdb", layer = "ds2721")
+```
 
 ```{r}
 basemap <- leaflet() %>% 
@@ -29,6 +43,42 @@ basemap
 ```
 
 https://rstudio.github.io/leaflet/showhide.html
+https://rstudio-pubs-static.s3.amazonaws.com/307862_b8c8460272dc4a2a9023d033d5f3ec34.html
+https://rstudio.github.io/leaflet/
 
 
+```{r}
+class(aquatic_lyr)
+aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
+terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
+
+aq5 <- colorBin("viridis", domain = aquatic_lyr$AqHabRank, bins = 0:5)
+tr5 <- colorBin("magma", domain = aquatic_lyr$TerrHabRank, bins = 0:5)
+```
+
+
+```{r}
+basemap %>% 
+  addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
+  addTiles(group = terrestrial_lyr$TerrHabRank, "Terrestrial Significant Habitat") %>% 
+  addPolygons(data=aquatic_lyr, 
+              fillColor= ~aq5(AqHabRank),
+              fillOpacity =.7,
+              color= NA) %>% 
+  addPolygons(data=terrestrial_lyr,
+              fillColor= ~tr5(TerrHabRank),
+              fillOpacity =.7,
+              color = NA) %>% 
+  addLayersControl(
+    baseGroups = c("Aquatic Significant Habitat", "Terrestrial Significant Habitat"),
+    options = layersControlOptions(collapsed=FALSE)
+  )
+  
+```
+
+```{r}
+basemap %>% 
+     addLegend(pal = aq5, values = ~AqHabRank, opacity = 0.7, 
+            title = NULL, position = "bottomright")
+```
 
