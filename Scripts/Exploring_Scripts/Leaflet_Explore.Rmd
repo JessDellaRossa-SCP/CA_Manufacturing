@@ -18,8 +18,8 @@ library(dplyr)
 library(rgdal)
 library(ggspatial)
 library(viridis)
-library(mapboxer)
 library(leaflet)
+library(shiny)
 ```
 
 ```{r}
@@ -70,7 +70,7 @@ https://rstudio.github.io/leaflet/
 
 
 ```{r}
-class(tribal)
+#This makes sure all of the datasets can speak with the leaflet basemap with the same projection and geometry. 
 aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
 terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
 subset_sb535 <- st_transform(subset_sb535, CRS("+proj=longlat +datum=WGS84"))
@@ -234,5 +234,8 @@ big_a_map <-  basemap %>%
 big_a_map
 ```
 
+```{r}
+
+```
 
 
