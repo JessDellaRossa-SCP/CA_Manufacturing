@@ -79,6 +79,7 @@ tribal <- st_transform(tribal, CRS("+proj=longlat +datum=WGS84"))
 
 
 ```{r}
+#set color palletes for maps.
 aq5 <- colorNumeric("viridis", domain = aquatic_lyr$AqHabRank)
 tr5 <- colorNumeric("magma", domain = aquatic_lyr$TerrHabRank)
 tribe_col <- colorFactor("#de2d26", domain=tribal$GEOID)
@@ -88,6 +89,20 @@ dacs_col <- colorFactor("#006837", domain = subset_sb535$Tract)
 
 
 ```{r}
+#labels for polygons
+dac_label <- sprintf(
+  "<h2>%s</h2>",
+  subset_sb535$ApproxLoc) %>% 
+  lapply(htmltools::HTML)
+
+tribal_label <- sprintf(
+  "<h2>%s</h2>",
+  tribal$Name) %>% 
+  lapply(htmltools::HTML)
+
+```
+
+```{r eval=FALSE, include=FALSE}
 habitat_map <- basemap %>% 
   addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
   addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
@@ -104,13 +119,13 @@ habitat_map <- basemap %>%
               group = "Terrestrial Significant Habitat") %>% 
   addLegend(position = "bottomright", 
             pal = aq5, 
-            title = "Aquatic Significant Habitat Rank", 
+            title = "Aquatic Significant <br>Habitat Rank", 
             values = aquatic_lyr$AqHabRank, 
             group = "Aquatic Significant Habitat",
             opacity = 1) %>% 
   addLegend(position = "bottomright", 
             pal = tr5, 
-            title = "Terrestrial Significant Habitat Rank", 
+            title = "Terrestrial Significant <br>Habitat Rank", 
             values = terrestrial_lyr$TerrHabRank, 
             group = "Terrestrial Significant Habitat",
             opacity = 1) %>% 
@@ -119,24 +134,10 @@ habitat_map <- basemap %>%
     overlayGroups = c("Aquatic Significant Habitat", "Terrestrial Significant Habitat"),
     options = layersControlOptions(collapsed=FALSE)
   )
-#habitat_map
 ```
 
 
-```{r}
-dac_label <- sprintf(
-  "<h2>%s</h2>",
-  subset_sb535$ApproxLoc) %>% 
-  lapply(htmltools::HTML)
-
-tribal_label <- sprintf(
-  "<h2>%s</h2>",
-  tribal$Name) %>% 
-  lapply(htmltools::HTML)
-
-```
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 map_535 <- basemap %>% 
   addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
   addTiles(group = subset_sb535$Tract, "SB 535 DACs") %>% 
@@ -169,5 +170,69 @@ map_535 <- basemap %>%
     options = layersControlOptions(collapsed=FALSE)
               )
 ```
+
+
+```{r}
+big_a_map <-  basemap %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+  addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
+  addTiles(group = terrestrial_lyr$TerrHabRank, "Terrestrial Significant Habitat") %>% 
+  addTiles(group = subset_sb535$Tract, "SB 535 DACs") %>% 
+  addTiles(group = tribal$GEOID, "Federally Recognized Tribes") %>% 
+    addPolygons(data=aquatic_lyr, 
+              fillColor= ~aq5(AqHabRank),
+              fillOpacity =.7,
+              color= NA,
+              group = "Aquatic Significant Habitat") %>% 
+  addPolygons(data=terrestrial_lyr,
+              fillColor= ~tr5(TerrHabRank),
+              fillOpacity =.7,
+              color = NA,
+              group = "Terrestrial Significant Habitat") %>% 
+  addPolygons(data=tribal,
+              fillColor= ~tribe_col(GEOID),
+              fillOpacity = 0.9,
+              color= "#252525",
+              weight=1,
+              group = "Federally Recognized Tribes",
+              label = tribal_label,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal",padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>% 
+  addPolygons(data=subset_sb535,
+              fillColor=~dacs_col(Tract),
+              fillOpacity = 0.9,
+              color = "#252525",
+              weight =1,
+              group = "SB 535 DACs",
+              label = dac_label,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal",padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>% 
+  addLegend(position = "bottomright", 
+            pal = aq5, 
+            title = "Aquatic Significant <br>Habitat Rank", 
+            values = aquatic_lyr$AqHabRank, 
+            group = "Aquatic Significant Habitat",
+            opacity = 1) %>% 
+  addLegend(position = "bottomright", 
+            pal = tr5, 
+            title = "Terrestrial Significant <br>Habitat Rank", 
+            values = terrestrial_lyr$TerrHabRank, 
+            group = "Terrestrial Significant Habitat",
+            opacity = 1) %>% 
+  addLayersControl(
+    baseGroups = "Terrain",
+    overlayGroups = c("Aquatic Significant Habitat", "Terrestrial Significant Habitat", "SB 535 DACs", "Federally Recognized Tribes"),
+    options = layersControlOptions(collapsed=FALSE)
+  )
+```
+
+```{r}
+big_a_map
+```
+
 
 
