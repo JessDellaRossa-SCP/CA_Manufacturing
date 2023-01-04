@@ -78,19 +78,14 @@ ui <- fluidPage(
     mainPanel(
       h2("California Manufacturing Activity Interactive Map", align = "center"),
       h5("by: Jessica DellaRossa & Elena Galkina", align = "center"),
-      plotOutput(outputId = "ca_map")
+      #plotOutput(outputId = "ca_map")
     )
   )
 )
 
 
 # Define server logic 
-server <- function(input, output, session) {
-  output$ca_map <- renderPlot({
-    
-  })
-  )
-}
+server <- function(input, output, session) {}
 
 # Run the application 
 shinyApp(ui = ui, server = server)

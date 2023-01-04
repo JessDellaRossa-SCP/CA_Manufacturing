@@ -79,9 +79,38 @@ ggplot(naics_groups4) +
 
 
 ```
+
 ```{r}
 naics_groups$groups
-write.csv(naics_groups, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_3.csv", row.names=FALSE)
+#write.csv(naics_groups, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_3.csv", row.names=FALSE)
 ```
 
+```{r}
+#Group NAICS categories - take the first 3 digits from NAICS codes to see how many.
+sic_counted$groups <- sic_counted$code %>% 
+  str_sub(start = 1, end = 2)
+  
+
+sic_groups <- sic_counted %>% 
+  filter(grepl("^20", code) | grepl("^21", code)| grepl("^22", code)| grepl("^23", code)| grepl("^24", code)| grepl("^25", code)| grepl("^26", code)| grepl("^27", code)| grepl("^28", code)| grepl("^29", code)| grepl("^30", code)| grepl("^31", code)| grepl("^32", code)| grepl("^33", code)| grepl("^34", code)| grepl("^35", code)| grepl("^36", code)| grepl("^37", code)| grepl("^38", code)| grepl("^39", code)) %>% 
+  count(groups) %>% 
+  arrange(desc(n))
+
+#esquisser(sic_groups)
+
+
+ggplot(sic_groups) +
+  aes(x = groups, y = n, fill = groups) +
+  geom_col() +
+  scale_fill_hue(direction = 1) +
+  labs(
+    x = "SIC 2 Digit Groups",
+    y = "Count of Group",
+    title = "SIC Groups Count"
+  ) +
+  theme_minimal() + title + theme(axis.text.x = element_text(angle=45, hjust =1)) + theme(legend.position = "none")
+```
+```{r}
+#write.csv(sic_groups, "~\\DTSC\\Manufacturing_Projects\\csv\\sic_3.csv", row.names=FALSE)
+```
 
