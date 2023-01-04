@@ -77,7 +77,7 @@ plot_aq_high
 ```
 
 ```{r}
-plot_tr <-ggplot(data=terrestrial_lyr) +geom_sf(aes(fill=TerrHabRank), col= NA)+ scale_fill_viridis() + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#f03b20") +th + labs(x=NULL, y=NULL, title="California Terrestrial Significant Habitats Ranked 1-5", fill = "Rank")+ title
+plot_tr <-ggplot(data=terrestrial_lyr) +geom_sf(aes(fill=TerrHabRank), col= NA)+ scale_fill_viridis(option="magma") + geom_sf(data=california, inherit.aes=FALSE, fill=NA, col="#f03b20") +th + labs(x=NULL, y=NULL, title="California Terrestrial Significant Habitats Ranked 1-5", fill = "Rank")+ title
 plot_tr
 ```
 
