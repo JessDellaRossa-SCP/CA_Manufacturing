@@ -12,9 +12,6 @@ opts_knit$set(root.dir="~/DTSC/Manufacturing_Projects/csv/Ecosystems")
 rm(list=ls())
 library(tidyverse)
 library(sf)
-library(ggplot2)
-library(plotly)
-library(dplyr)
 library(rgdal)
 library(ggspatial)
 library(viridis)
@@ -104,7 +101,7 @@ tribal_label <- sprintf(
 
 ```{r eval=FALSE, include=FALSE}
 habitat_map <- basemap %>% 
-  addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain",) %>%
   addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
   addTiles(group = terrestrial_lyr$TerrHabRank, "Terrestrial Significant Habitat") %>% 
   addPolygons(data=aquatic_lyr, 
@@ -174,7 +171,8 @@ map_535 <- basemap %>%
 
 ```{r}
 big_a_map <-  basemap %>% 
-  addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain",
+                   options = providerTileOptions(minZoom = 5, maxZoom = 18)) %>%
   addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
   addTiles(group = terrestrial_lyr$TerrHabRank, "Terrestrial Significant Habitat") %>% 
   addTiles(group = subset_sb535$Tract, "SB 535 DACs") %>% 
