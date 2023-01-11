@@ -10,6 +10,7 @@ library(rgdal)
 library(ggspatial)
 library(viridis)
 library(leaflet)
+library(DT)
 
 #Load files ---------
 setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
@@ -132,22 +133,15 @@ ui <- fluidPage(
                                                        selected = 1),
                       )))),
       #Output interactive mapping
-    mainPanel(
+    mainPanel( 
       h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
-      h5("by: Jessica DellaRossa & Elena Galkina", align = "center"),
-      leafletOutput("mymap")
-    )
+      h5("by: Jessica DellaRossa & Elena Galkina", align = "center")),
   )
 )
 
 
 # Define server logic 
-server <- function(input, output, session) {
-  output$mymap <- renderLeaflet({
-   leaflet() %>% 
-      setView(lat = 36.778259, lng = -119.417931, zoom = 5)
-  })
-}
+server <- function(input, output) {}
 
 # Run the application 
 shinyApp(ui = ui, server = server)
