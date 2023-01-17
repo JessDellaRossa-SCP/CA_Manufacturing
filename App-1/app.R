@@ -72,10 +72,10 @@ tribal_label <- sprintf(
 ui <- fluidPage(
   tags$div(tags$style(HTML( ".selectize-dropdown, .selectize-dropdown.form-control{z-index:10000;}"))),
   theme = shinytheme("flatly"),
-  #Interactive Map Page
+  #Interactive Map Page ---- 
   navbarPage("California Manufacturing Activity Project",
              id = "home",
-      tabPanel(id= "map", title = "Interactive Map",
+      tabPanel(id= "map", title = "Interactive Map", fluid = TRUE, icon = icon("compass"),
                #Options on left-hand side for map
                sidebarLayout(
                  sidebarPanel(
@@ -135,6 +135,7 @@ ui <- fluidPage(
                  mainPanel(
                    h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
                    ))),
+      #Panel for tool instructions ----
       tabPanel(id = "howto", title = "How to Use This Tool",
                fluidRow(column(6,
                                HTML("<title> How to Use This Tool </title>")),
@@ -142,8 +143,60 @@ ui <- fluidPage(
                                #text
                                tags$div(HTML("<h4> <b> Purpose  </b> </h4>
                                <p> This web application is an interactive mapping tool that 
-                            allows users to blah blah.")))))
-               ))
+                            allows users to blah blah."))))),
+      #Panel describing datasets ----
+      tabPanel(id = "about", title = "About Datasets",
+               fluidRow(column(6,
+                               HTML("<title> About Datasets </title>")),
+                        column(12,
+                               #text
+                               tags$div(HTML("<h4> <b> Manufacturing Datasets  </b> </h4> <ul>
+                               <p> <li> <em> FRS – Facility Registry Services </em> DESCRIBE DATASET </li>
+                               <li> <em> TRI - Toxic Release Inventory </em> DESCRIBE DATASET </li>
+                               <li> <em> EIS - Emissions Inventory System </em> DESCRIBE DATASET </li>
+                               <li> <em> CERS - California Environmental Registry Systems </em> DESCRIBE DATASET </li> </ul>  </p>
+                               <hr>
+                               <h4> <b> Chemical Information </b> </h4>
+                               <p> ENTER CHEM INFO HERE </p>
+                               <hr>
+                               <h4> <b> Product Categories  </b> </h4>
+                               <p> Categories are based on NAICS and SIC codes </p>
+                               <hr>
+                               <h4> <b> Disadvantaged Communities from SB 535 </b> </h4>
+                               <p> This interactive map tool utilizes.... </p>
+                               <hr>
+                               <h4> <b> Significant Habitats  </b> </h4> <ul>
+                               <p> <li> <em> Aquatic Significant Habitats </em> DESCRIBE DATASET </li>
+                               <p> <li> <em> Terrestrial Significant Habitats </em> DESCRIBE DATASET </li> </ul> </p>
+                               <hr>
+                                             "))))),
+      #Panel describing project methods ----
+      tabPanel(id = "methods", title = "Methods",
+               fluidRow(column(6,
+                               HTML("<title> Methods </title>")),
+                        column(12,
+                               #text
+                               tags$div(HTML("<h4> <b> Project Goals  </b> </h4> <ul>
+                               <p> <li> <em> Goal 1 </em> DESCRIBE GOAL </li>
+                               <li> <em> Goal 2 </em> DESCRIBE GOAL </li>
+                               <li> <em> Goal 3 </em> DESCRIBE GOAL </li>
+                               <li> <em> Goal 4 </em> DESCRIBE GOAL </li> </ul>  </p>
+                               <hr>
+                               <h4> <b> Data Compilation </b> </h4>
+                               <p> Why did we choose these datasets? </p>
+                               <hr>
+                               <h4> <b> Data Analysis  </b> </h4>
+                               <p> Do not describe everything </p>
+                               <hr>
+                               <h4> <b> Product Categories </b> </h4>
+                               <p> Methods for choosing categories. </p>
+                               <hr>
+                               <h4> <b> GitHub  </b> </h4> 
+                               <p> add link to GitHub??? </p>
+                               <hr>
+                                             "))))),
+      
+))
       
 # Define server logic 
 server <- function(input, output, session) {}
