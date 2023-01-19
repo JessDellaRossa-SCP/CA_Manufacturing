@@ -134,6 +134,7 @@ ui <- fluidPage(
                  #Output interactive mapping
                  mainPanel(
                    h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
+                   leafletOutput("map", height = "800px")
                    ))),
       #Panel for tool instructions ----
       tabPanel(id = "howto", title = "How to Use This Tool",
@@ -199,7 +200,19 @@ ui <- fluidPage(
 ))
       
 # Define server logic 
-server <- function(input, output, session) {}
+server <- function(input, output, session) {
+  #base map -- 
+  mapbase <- reactive({
+    leaflet(options = leafletOptions(minZoom = 5, maxZoom = 18)) %>%
+      addTiles() %>% 
+      setView(lat = 36.778259, lng = -119.417931, zoom = 6)
+  })
+
+  #rendering map --
+  output$map <- renderLeaflet({
+    mapbase()
+  })
+}
 
 # Run the application 
 shinyApp(ui = ui, server = server)
