@@ -82,7 +82,7 @@ ui <- fluidPage(
                    #Panel options for Significant Habitat Rankings
                    titlePanel("Desired Significant Habitat Ranking"),
                    #Instructions for reader
-                   helpText("Explore California's aquatic and terrestrial significant habitats through rank filters. See the 'Significant Habitats' tab for more information."),
+                   helpText("Explore California's aquatic and terrestrial significant habitats through rank filters. See the 'About Datasets' tab for more information."),
                    fluidRow(column(8,
                                    #Select which rank(s) to plot
                                    checkboxGroupInput("aquatic", 
@@ -108,7 +108,7 @@ ui <- fluidPage(
                    #Panel options for Product Categories
                    titlePanel("Desired Potential Product Category"),
                    #Instructions for reader
-                   helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Product Categories' tab for more information."),
+                   helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
                    fluidRow(column(8,
                                    #Select product categories to show on map
                                    checkboxGroupInput("products", 
@@ -137,7 +137,7 @@ ui <- fluidPage(
                    leafletOutput("map", height = "800px")
                    ))),
       #Panel for tool instructions ----
-      tabPanel(id = "howto", title = "How to Use This Tool",
+      tabPanel(id = "howto", title = "How to Use This Tool", fluid = TRUE, icon= icon("question"),
                fluidRow(column(6,
                                HTML("<title> How to Use This Tool </title>")),
                         column(12,
@@ -146,7 +146,7 @@ ui <- fluidPage(
                                <p> This web application is an interactive mapping tool that 
                             allows users to blah blah."))))),
       #Panel describing datasets ----
-      tabPanel(id = "about", title = "About Datasets",
+      tabPanel(id = "about", title = "About Datasets", fluid = TRUE, icon= icon("database"),
                fluidRow(column(6,
                                HTML("<title> About Datasets </title>")),
                         column(12,
@@ -172,7 +172,7 @@ ui <- fluidPage(
                                <hr>
                                              "))))),
       #Panel describing project methods ----
-      tabPanel(id = "methods", title = "Methods",
+      tabPanel(id = "methods", title = "Methods", fluid = TRUE, icon = icon("gear"),
                fluidRow(column(6,
                                HTML("<title> Methods </title>")),
                         column(12,
@@ -196,15 +196,15 @@ ui <- fluidPage(
                                <p> add link to GitHub??? </p>
                                <hr>
                                              "))))),
-      tabPanel(id = "references", title = "References",
+      tabPanel(id = "references", title = "References", fluid= TRUE, icon = icon("circle-info"),
                fluidRow(column(6,
                                HTML("<title> References </title>")),
                         column(12,
                                #text
-                               tags$div(HTML("<h4> <b> Team Members  </b> </h4> <ul>
-                               <a href = 'https://dtsc.ca.gov/scp/'>
+                               tags$div(HTML("<a href = 'https://dtsc.ca.gov/scp/'>
                                <img src= 'SCP_Logo.png' width = '128' height = '98.5'style=' margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px' /> </a>
                                <hr>
+                               <h4> <b> Team Members  </b> </h4> <ul>
                                <p> <li> <b> Jessica DellaRossa: Project Manager </b> </li>
                                <li> Elena Galkina  </li>
                                <li> SCP Sponsors: </li></p>
@@ -237,6 +237,6 @@ server <- function(input, output, session) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-#  #Navigation Bar at the top:
+s#  #Navigation Bar at the top:
 #navbarPage("SCP Manufacturing Activity Map", shinytheme("lumen"),
            #tabPanel("Interactive Map", fluid = TRUE, icon = icon("compass")),
