@@ -196,6 +196,22 @@ ui <- fluidPage(
                                <p> add link to GitHub??? </p>
                                <hr>
                                              "))))),
+      tabPanel(id = "references", title = "References",
+               fluidRow(column(6,
+                               HTML("<title> References </title>")),
+                        column(12,
+                               #text
+                               tags$div(HTML("<h4> <b> Team Members  </b> </h4> <ul>
+                               <a href = 'https://dtsc.ca.gov/scp/'>
+                               <img src= 'SCP_Logo.png' width = '128' height = '98.5'style=' margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px' /> </a>
+                               <hr>
+                               <p> <li> <b> Jessica DellaRossa: Project Manager </b> </li>
+                               <li> Elena Galkina  </li>
+                               <li> SCP Sponsors: </li></p>
+                               <hr>
+                               
+                               <hr>
+                                             "))))),
       
 ))
       
@@ -203,16 +219,20 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   #base map -- 
   mapbase <- reactive({
-    leaflet(options = leafletOptions(minZoom = 5, maxZoom = 18)) %>%
+    leaflet(options = leafletOptions(minZoom = 5.5, maxZoom = 18)) %>%
       addTiles() %>% 
       setView(lat = 36.778259, lng = -119.417931, zoom = 6)
-  })
+    })
 
   #rendering map --
   output$map <- renderLeaflet({
-    mapbase()
-  })
+    mapbase() %>% 
+      addProviderTiles(providers$Stamen.Terrain, group = "Terrain")
+    })
+  
+  #incremental changes to map below
 }
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
