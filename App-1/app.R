@@ -16,12 +16,12 @@ library(DT)
 setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
 #This reads in the .gdb and shows the layers so you know which layer to read in. In this case, it doesn't matter. But some other .gdb will have multiple layers.
-aquatic.gdb <- st_read("ds2756.gdb")
+aquatic.gdb <- sf::st_read("ds2756.gdb")
 st_layers("ds2756.gdb")
 
 aquatic_lyr <- sf::st_read(dsn = "ds2756.gdb", layer = "ds2756")
 
-terrestrial.gdb <- st_read("ds2721.gdb")
+terrestrial.gdb <- sf::st_read("ds2721.gdb")
 st_layers("ds2721.gdb")
 
 terrestrial_lyr <- sf::st_read(dsn = "ds2721.gdb", layer = "ds2721")
@@ -31,13 +31,13 @@ rm(terrestrial.gdb)
 rm(aquatic.gdb)
 
 #Read in the census tracts and the DACs from sb535. Create a subset shp of the sb535 DACs.
-tracts <- st_read("CES4_Final_Shapefile.shp")
+tracts <- sf::st_read("CES4_Final_Shapefile.shp")
 sb535_tracts <- read.csv("Sb535.tracts.csv")
 subset_sb535 <- tracts %>% 
   filter(Tract %in% sb535_tracts$Census.Tract)
 
 #this reads in the data set for tribal land within the sb535 gdb.
-dacs <- st_read("SB535DACgdb_F_2022.gdb")
+dacs <- sf::st_read("SB535DACgdb_F_2022.gdb")
 #this shows us the layers with their projections of the dataset
 st_layers("SB535DACgdb_F_2022.gdb")
 
@@ -49,6 +49,7 @@ aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
 terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
 subset_sb535 <- st_transform(subset_sb535, CRS("+proj=longlat +datum=WGS84"))
 tribal <- st_transform(tribal, CRS("+proj=longlat +datum=WGS84"))
+
 
 #set color palettes for maps.
 aq5 <- colorNumeric("viridis", domain = aquatic_lyr$AqHabRank)
@@ -217,6 +218,11 @@ ui <- fluidPage(
       
 # Define server logic 
 server <- function(input, output, session) {
+  #Reactive expression for the data subsetted to what the user selected
+  aq_data <- reactive({
+    filter(aquatic_lyr, AqHabRank == input$aquatic)
+  })
+  
   #base map -- 
   mapbase <- reactive({
     leaflet(options = leafletOptions(minZoom = 5.5, maxZoom = 18)) %>%
@@ -230,13 +236,20 @@ server <- function(input, output, session) {
       addProviderTiles(providers$Stamen.Terrain, group = "Terrain")
     })
   
-  #incremental changes to map below
+  #Observe aquatic significant habitat filter changes
+  observe({
+    leafletProxy("map", data= aq_data()) %>% 
+      addPolygons(data=aquatic_lyr, 
+                  fillColor= ~aq5(AqHabRank),
+                  fillOpacity =.7,
+                  color= NA)
+  })
 }
 
 
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-s#  #Navigation Bar at the top:
+#  #Navigation Bar at the top:
 #navbarPage("SCP Manufacturing Activity Map", shinytheme("lumen"),
            #tabPanel("Interactive Map", fluid = TRUE, icon = icon("compass")),
