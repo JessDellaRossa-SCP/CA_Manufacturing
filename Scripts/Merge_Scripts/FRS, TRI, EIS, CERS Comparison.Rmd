@@ -57,23 +57,14 @@ new_from_tri <- subset(tri_comparison, is.na(tri_comparison$From_FRS))
 ```
 
 #Now we can try a similar process using the "facilities" df to compare EIS facility codes in the EIS data and FRS data.
-#First, we need to create a trimmed df of EIS facilities only. 
-#Next, we need to pull in the EIS Facility ID from the facilities df. Then compare to the frs_trim df using the same method we used for TRI.
+#We filter out overlapping EIS IDs from the eis data and facilities.
 ```{r}
 colnames(facilities)[3] <- "EIS.Facility.ID"
 colnames(facilities)[1] <- "RegistryID"
 colnames(frs)[1] <- "RegistryID"
 
-eis <- right_join(facilities, eis, by= "EIS.Facility.ID")
-eis <- eis[,colnames(eis)[c(1:3, 28:65)]]
-
-eis_trim <- as.data.frame(eis[,c(1,3)])
-colnames(eis_trim)[2] <- "EIS.Facility.ID"
-
-eis_trim <- eis_trim %>% 
-  mutate(From_EIS = "EIS")
-
-sum(is.na(eis_trim$RegistryID))
+new_from_eis <- eis %>% 
+  filter(!EIS.Facility.ID %in% facilities$EIS.Facility.ID)
 ```
 #There are 6,745 NEW facilities from the EIS data that do not match up to a FRS Registry ID. However, we need to see how many facilities overlap with FRS data.
 
@@ -84,17 +75,6 @@ frs_with_codes <- frs_with_codes[,colnames(frs_with_codes)[c(1, 23:66)]]
 
 frs_trim <- left_join(frs_trim, frs_with_codes, by = "RegistryID")
 frs_trim <- frs_trim[,colnames(frs_trim)[c(1,2, 20:27)]]
-```
-
-#Compare the EIS facility IDs from the trimmed frs_trim and eis_trim datasets. There are 6,870 facilities that were not captured in our analysis of the FRS data. Only 125 exist on the master facility list and the remaining 6,745 will need to be added using the primary data from the EIS dataset. 
-```{r}
-colnames(frs_trim)[3]="EIS.Facility.ID"
-eis_comparison <- right_join(frs_trim, eis_trim, by = "EIS.Facility.ID")
-sum(is.na(eis_comparison$From_FRS))
-```
-#Create a new datframe of the EIS IDs that need to be added to the Master FRS List. 
-```{r}
-new_from_eis <- subset(eis_comparison, is.na(eis_comparison$From_FRS))
 ```
 
 
@@ -131,7 +111,6 @@ colnames(frs_trim)[7] <- "CalEPA_Site"
 cers_comparison <- inner_join(cers, frs_trim, by= "CalEPA_Site")
 cers_comparison <- cers_comparison %>% 
   distinct(CalEPA_Site, .keep_all=TRUE)
-cers_comparison <- cers_comparison[,colnames(cers_comparison) [c(17:7,9)]]
 sum(is.na(cers_comparison$From_FRS))
 ```
 #This comparison indicates that there are 0 new facilities to add from the CERS data into the FRS list.
@@ -143,9 +122,15 @@ sum(is.na(cers_comparison$From_FRS))
 #Create a new dataframe of the new facilities from TRI and all of the cleaned up FRS facilities. 
 ```{r}
 colnames(tri)[16] <- "RegistryID"
-colnames(facilities)[5] <- "TRI_ID"
-new_from_tri <- left_join(new_from_tri, facilities, by = "TRI_ID")
-new_from_tri <- new_from_tri[,colnames(new_from_tri) [c(1, 14, 2, 3, 4, 5, 6, 7, 49, 50, 8, 9, 10, 11, 12)]]
+colnames(frs_with_codes)[21] <- "TRI_ID"
+new_tri <- tri %>% 
+  filter(RegistryID %in% new_from_tri$RegistryID)
+new_tri[,"EIS_Facility_ID"] = NA
+new_tri[,"CENSUS_BLOCK_CODE"] = NA
+new_tri[,"HUC_CODE"] = NA
+new_tri[,"DATUM"] = NA
+new_from_tri <- new_tri[,colnames(new_tri) [c(16, 92, 5, 6, 7, 8, 9, 10, 93, 94, 28, 48, 62, 63, 95)]]
+
 ```
 
 #Match up the FRS column headers with the frs_tri_cers dataframe.
@@ -157,10 +142,13 @@ frs <-  frs[,colnames(frs) [c(1,39,2,3,5,6,8,11,17,18,27,29,31,32,37)]]
 #Then create a subset dataframe of the new EIS facilties. Match up the columns to create a one master file. 
 #First, join the new_from_eis to the eis dataframe and reduce the columns.
 ```{r}
-new_from_eis <- eis %>% 
-  filter(RegistryID %in% new_from_eis$RegistryID.y)
+new_from_eis[,"FRS_Registry_ID"] = NA
 new_from_eis[,"SIC"] = NA
-new_from_eis <- new_from_eis[,colnames(new_from_eis) [c(1, 3, 4, 5, 7, 26, 11, 13, 14, 15, 31, 42, 16, 17, 22)]]
+new_from_eis[,"CENSUS_BLOCK_CODE"] = NA
+new_from_eis[,"HUC_CODE"] = NA
+new_from_eis[,"SIC"] = NA
+new_from_eis[,"DATUM"] = NA
+new_from_eis <- new_from_eis[,colnames(new_from_eis) [c(21, 1, 8, 15, 16, 5, 4, 18, 23, 24, 10, 22, 13, 14, 25)]]
 ```
 
 # Before rbinding, create an order for the columns to make sure they are all aligned perfectly. 
