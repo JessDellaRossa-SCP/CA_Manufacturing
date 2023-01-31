@@ -220,7 +220,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   #Reactive expression for the data subsetted to what the user selected
   aq_data <- reactive({
-    filter(aquatic_lyr, AqHabRank == input$aquatic)
+    filter(aquatic_lyr[aquatic_lyr$AqHabRank %in% input$aquatic, ])
   })
   
   #base map -- 
@@ -237,7 +237,7 @@ server <- function(input, output, session) {
     })
   
   #Observe aquatic significant habitat filter changes
-  observe({
+  observeEvent(input$aquatic, {
     leafletProxy("map", data= aq_data()) %>% 
       addPolygons(data=aquatic_lyr, 
                   fillColor= ~aq5(AqHabRank),
@@ -250,6 +250,3 @@ server <- function(input, output, session) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-#  #Navigation Bar at the top:
-#navbarPage("SCP Manufacturing Activity Map", shinytheme("lumen"),
-           #tabPanel("Interactive Map", fluid = TRUE, icon = icon("compass")),
