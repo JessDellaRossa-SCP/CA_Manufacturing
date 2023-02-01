@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+require(knitr)
+opts_knit$set(root.dir="~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 rm(list=ls())
 library(tidyverse)
 library(sf)
