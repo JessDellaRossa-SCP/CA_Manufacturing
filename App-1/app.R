@@ -24,6 +24,7 @@ aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
 terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
 
 #set color palettes for maps.
+#Look into making this reactive!
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
 tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
 
