@@ -15,60 +15,6 @@ library(DT)
 #Load files ---------
 setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
-#This reads in the .gdb and shows the layers so you know which layer to read in. In this case, it doesn't matter. But some other .gdb will have multiple layers.
-aquatic.gdb <- sf::st_read("ds2756.gdb")
-st_layers("ds2756.gdb")
-
-aquatic_lyr <- sf::st_read(dsn = "ds2756.gdb", layer = "ds2756")
-
-terrestrial.gdb <- sf::st_read("ds2721.gdb")
-st_layers("ds2721.gdb")
-
-terrestrial_lyr <- sf::st_read(dsn = "ds2721.gdb", layer = "ds2721")
-
-#clear these out of your environment to take up less space
-rm(terrestrial.gdb)
-rm(aquatic.gdb)
-
-#Read in the census tracts and the DACs from sb535. Create a subset shp of the sb535 DACs.
-tracts <- sf::st_read("CES4_Final_Shapefile.shp")
-sb535_tracts <- read.csv("Sb535.tracts.csv")
-subset_sb535 <- tracts %>% 
-  filter(Tract %in% sb535_tracts$Census.Tract)
-
-#this reads in the data set for tribal land within the sb535 gdb.
-dacs <- sf::st_read("SB535DACgdb_F_2022.gdb")
-#this shows us the layers with their projections of the dataset
-st_layers("SB535DACgdb_F_2022.gdb")
-
-#create a spatial layer for tribal boundaries
-tribal<- sf::st_read(dsn = "SB535DACgdb_F_2022.gdb", layer = "SB535tribalboundaries2022")
-
-#This makes sure all of the datasets can speak with the leaflet basemap with the same projection and geometry. 
-aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
-terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
-subset_sb535 <- st_transform(subset_sb535, CRS("+proj=longlat +datum=WGS84"))
-tribal <- st_transform(tribal, CRS("+proj=longlat +datum=WGS84"))
-
-
-#set color palettes for maps.
-aq5 <- colorNumeric("viridis", domain = aquatic_lyr$AqHabRank)
-tr5 <- colorNumeric("magma", domain = aquatic_lyr$TerrHabRank)
-tribe_col <- colorFactor("#de2d26", domain=tribal$GEOID)
-dacs_col <- colorFactor("#006837", domain = subset_sb535$Tract)
-
-#labels for polygons
-dac_label <- sprintf(
-  "<h2>%s</h2>",
-  subset_sb535$ApproxLoc) %>% 
-  lapply(htmltools::HTML)
-
-tribal_label <- sprintf(
-  "<h2>%s</h2>",
-  tribal$Name) %>% 
-  lapply(htmltools::HTML)
-
-
 ### Create User Interface -------
 ui <- fluidPage(
   tags$div(tags$style(HTML( ".selectize-dropdown, .selectize-dropdown.form-control{z-index:10000;}"))),
