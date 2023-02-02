@@ -16,12 +16,12 @@ library(DT)
 setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
 #Read in terrestrial and aquatic significant habitat data for ranks 4 & 5. 
-terr_4_5 <- st_read("Ter_hab_4_5.shp")
-aq_4_5 <- st_read("Aqu_hab_4_5.shp")
+terrestrial_lyr<- st_read("Ter_hab_4_5.shp")
+aquatic_lyr <- st_read("Aqu_hab_4_5.shp")
 
 #Change the projections of these datasets to match WGS84 projection for leaflet.
-aquatic_lyr <- st_transform(aq_4_5, CRS("+proj=longlat +datum=WGS84"))
-terrestrial_lyr <- st_transform(terr_4_5, CRS("+proj=longlat +datum=WGS84"))
+aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
+terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
 
 #set color palettes for maps.
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
