@@ -22,4 +22,66 @@ library(shiny)
 
 ## R Markdown
 
+```{r}
+#Read in terrestrial and aquatic significant habitat data for ranks 4 & 5. 
+terr_4_5 <- st_read("Ter_hab_4_5.shp")
+aq_4_5 <- st_read("Aqu_hab_4_5.shp")
+```
+```{r}
+#Change the projections of these datasets to match WGS84 projection for leaflet.
+aquatic_lyr <- st_transform(aq_4_5, CRS("+proj=longlat +datum=WGS84"))
+terrestrial_lyr <- st_transform(terr_4_5, CRS("+proj=longlat +datum=WGS84"))
+```
+
+```{r}
+#set color palettes for maps.
+aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
+tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
+```
+
+```{r}
+basemap <- leaflet() %>% 
+  setView(lat = 36.778259, lng = -119.417931, zoom = 5) %>%
+  addTiles()
+```
+
+```{r}
+colnames(aq_4_5)
+```
+
+
+```{r}
+habitat_map_2 <- basemap %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain",) %>%
+  addTiles(group = aquatic_lyr$AqHabRank,"Aquatic Significant Habitat") %>% 
+  addTiles(group = terrestrial_lyr$TerrHabRan, "Terrestrial Significant Habitat") %>% 
+  addPolygons(data=aquatic_lyr, 
+              fillColor= ~aq5(AqHabRank),
+              fillOpacity =.7,
+              color= NA,
+              group = "Aquatic Significant Habitat") %>% 
+  addPolygons(data=terrestrial_lyr,
+              fillColor= ~tr5(TerrHabRan),
+              fillOpacity =.7,
+              color = NA,
+              group = "Terrestrial Significant Habitat") %>% 
+  addLegend(position = "bottomright", 
+            pal = aq5, 
+            title = "Aquatic Significant <br>Habitat Rank", 
+            values = aquatic_lyr$AqHabRank, 
+            group = "Aquatic Significant Habitat",
+            opacity = 1) %>% 
+  addLegend(position = "bottomright", 
+            pal = tr5, 
+            title = "Terrestrial Significant <br>Habitat Rank", 
+            values = terrestrial_lyr$TerrHabRan, 
+            group = "Terrestrial Significant Habitat",
+            opacity = 1) %>% 
+  addLayersControl(
+    baseGroups = "Terrain",
+    overlayGroups = c("Aquatic Significant Habitat", "Terrestrial Significant Habitat"),
+    options = layersControlOptions(collapsed=FALSE)
+  )
+habitat_map_2
+```
 

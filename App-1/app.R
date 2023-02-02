@@ -15,6 +15,19 @@ library(DT)
 #Load files ---------
 setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
+#Read in terrestrial and aquatic significant habitat data for ranks 4 & 5. 
+terr_4_5 <- st_read("Ter_hab_4_5.shp")
+aq_4_5 <- st_read("Aqu_hab_4_5.shp")
+
+#Change the projections of these datasets to match WGS84 projection for leaflet.
+aquatic_lyr <- st_transform(aq_4_5, CRS("+proj=longlat +datum=WGS84"))
+terrestrial_lyr <- st_transform(terr_4_5, CRS("+proj=longlat +datum=WGS84"))
+
+#set color palettes for maps.
+aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
+tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
+
+
 ### Create User Interface -------
 ui <- fluidPage(
   tags$div(tags$style(HTML( ".selectize-dropdown, .selectize-dropdown.form-control{z-index:10000;}"))),
@@ -35,20 +48,12 @@ ui <- fluidPage(
                                    checkboxGroupInput("aquatic", 
                                                       h4("Aquatic Significant Habitat Rank"), 
                                                       choices = list("Rank 5" = 5,
-                                                                     "Rank 4" = 4,
-                                                                     "Rank 3" = 3,
-                                                                     "Rank 2" = 2,
-                                                                     "Rank 1" = 1,
-                                                                     "Unranked" = 0),
+                                                                     "Rank 4" = 4),
                                                       selected = 5),
                                    checkboxGroupInput("terrestrial", 
                                                       h4("Terrestrial Significant Habitat Rank"), 
                                                       choices = list("Rank 5" = 5,
-                                                                     "Rank 4" = 4,
-                                                                     "Rank 3" = 3,
-                                                                     "Rank 2" = 2,
-                                                                     "Rank 1" = 1,
-                                                                     "Unranked" = 0),
+                                                                     "Rank 4" = 4),
                                                       selected =5),
                                    )),
                    hr(),
@@ -166,9 +171,14 @@ ui <- fluidPage(
       
 # Define server logic 
 server <- function(input, output, session) {
-  #Reactive expression for the data subsetted to what the user selected
+  #Reactive expression for the aquatic layer rank selected by the user
   aq_data <- reactive({
     filter(aquatic_lyr[aquatic_lyr$AqHabRank %in% input$aquatic, ])
+  })
+  
+  #Reactive expression for the terrestrial layer rank selected by the user
+  tr_data <- reactive({
+    filter(terrestrial_lyr[terrestrial_lyr$TerrHabRan %in% input$terrestrial, ])
   })
   
   #base map -- 
@@ -189,6 +199,15 @@ server <- function(input, output, session) {
     leafletProxy("map", data= aq_data()) %>% 
       addPolygons(data=aquatic_lyr, 
                   fillColor= ~aq5(AqHabRank),
+                  fillOpacity =.7,
+                  color= NA)
+  })
+  
+  #Observe terrestrial significant habitat filter changes
+  observeEvent(input$terrestrial, {
+    leafletProxy("map", data= tr_data()) %>% 
+      addPolygons(data=terrestrial_lyr, 
+                  fillColor= ~tr5(TerrHabRan),
                   fillOpacity =.7,
                   color= NA)
   })

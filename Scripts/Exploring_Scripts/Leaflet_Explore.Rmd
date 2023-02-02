@@ -78,7 +78,7 @@ tribal <- st_transform(tribal, CRS("+proj=longlat +datum=WGS84"))
 ```{r}
 #set color palettes for maps.
 aq5 <- colorNumeric("viridis", domain = aquatic_lyr$AqHabRank)
-tr5 <- colorNumeric("magma", domain = aquatic_lyr$TerrHabRank)
+tr5 <- colorNumeric("magma", domain = terrestrial_lyr$TerrHabRank)
 tribe_col <- colorFactor("#de2d26", domain=tribal$GEOID)
 dacs_col <- colorFactor("#006837", domain = subset_sb535$Tract)
 ```
