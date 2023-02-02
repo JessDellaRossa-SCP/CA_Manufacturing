@@ -197,10 +197,8 @@ server <- function(input, output, session) {
   #Observe aquatic significant habitat filter changes
   observeEvent(input$aquatic, {
     leafletProxy("map", data= aq_data()) %>% 
-      addPolygons(data=aquatic_lyr, 
-                  fillColor= ~aq5(AqHabRank),
-                  fillOpacity =.7,
-                  color= NA)
+      clearShapes() %>% 
+      addPolygons()
   })
   
   #Observe terrestrial significant habitat filter changes
