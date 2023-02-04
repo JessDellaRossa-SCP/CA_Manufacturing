@@ -12,6 +12,7 @@ library(viridis)
 library(leaflet)
 library(DT)
 
+
 #Load files ---------
 setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
@@ -172,6 +173,7 @@ ui <- fluidPage(
       
 # Define server logic 
 server <- function(input, output, session) {
+  
   #Reactive expression for the aquatic layer rank selected by the user
   aq_data <- reactive({
     filter(aquatic_lyr[aquatic_lyr$AqHabRank %in% input$aquatic, ])
@@ -205,11 +207,9 @@ server <- function(input, output, session) {
   #Observe terrestrial significant habitat filter changes
   observeEvent(input$terrestrial, {
     leafletProxy("map", data= tr_data()) %>% 
-      addPolygons(data=terrestrial_lyr, 
-                  fillColor= ~tr5(TerrHabRan),
-                  fillOpacity =.7,
-                  color= NA)
+      addPolygons()
   })
+
 }
 
 
