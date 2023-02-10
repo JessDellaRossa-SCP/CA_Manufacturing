@@ -26,11 +26,13 @@ library(shiny)
 #Read in terrestrial and aquatic significant habitat data for ranks 4 & 5. 
 terr_4_5 <- st_read("Ter_hab_4_5.shp")
 aq_4_5 <- st_read("Aqu_hab_4_5.shp")
+facilities <- st_read("facilitylist.shp")
 ```
 ```{r}
 #Change the projections of these datasets to match WGS84 projection for leaflet.
 aquatic_lyr <- st_transform(aq_4_5, CRS("+proj=longlat +datum=WGS84"))
 terrestrial_lyr <- st_transform(terr_4_5, CRS("+proj=longlat +datum=WGS84"))
+st_crs(facilities) == st_crs(aquatic_lyr)
 ```
 
 ```{r}
@@ -65,6 +67,8 @@ habitat_map_2 <- basemap %>%
               fillOpacity =.7,
               color = NA,
               group = "Terrestrial Significant Habitat") %>% 
+  addCircles(data = facilities,
+             color= "blue") %>% 
   addLegend(position = "bottomright", 
             pal = aq5, 
             title = "Aquatic Significant <br>Habitat Rank", 
