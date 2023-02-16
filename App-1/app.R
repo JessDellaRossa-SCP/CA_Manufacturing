@@ -50,13 +50,11 @@ ui <- fluidPage(
                                    checkboxGroupInput("aquatic", 
                                                       h4("Aquatic Significant Habitat Rank"), 
                                                       choices = list("Rank 5" = 5,
-                                                                     "Rank 4" = 4),
-                                                      selected = 5),
+                                                                     "Rank 4" = 4)),
                                    checkboxGroupInput("terrestrial", 
                                                       h4("Terrestrial Significant Habitat Rank"), 
                                                       choices = list("Rank 5" = 5,
-                                                                     "Rank 4" = 4),
-                                                      selected =5),
+                                                                     "Rank 4" = 4))
                                    )),
                    hr(),
                    #Panel options for Product Categories
@@ -82,8 +80,7 @@ ui <- fluidPage(
                                                                      "Paper Manufacturing" = 0,
                                                                      "Plastics Product Manufacturing" = 0,
                                                                      "Textiles" = 0,
-                                                                     "Transportation Manufacturing" = 0),
-                                                      selected = 1),
+                                                                     "Transportation Manufacturing" = 0),)
                    ))),
                  #Output interactive mapping
                  mainPanel(
@@ -167,7 +164,7 @@ ui <- fluidPage(
                                <hr>
                                
                                <hr>
-                                             "))))),
+                                             ")))))
       
 ))
       
@@ -198,24 +195,19 @@ server <- function(input, output, session) {
     })
   
   #Observe aquatic significant habitat filter changes
-  observeEvent(input$aquatic, {
-    leafletProxy("map", data= aq_data()) %>% 
+  observeEvent({input$aquatic
+    input$terrestrial}, {
+    leafletProxy("map") %>% 
       clearShapes() %>% 
-      addPolygons(data=aquatic_lyr, 
-                  fillColor= ~aq5(AqHabRank),
+      addPolygons(data=aq_data(), 
+                  fillColor= ~aq5(input$aquatic),
+                  fillOpacity =.7,
+                  color= NA) %>% 
+      addPolygons(data=tr_data(),
+                  fillColor= ~tr5(input$terrestrial),
                   fillOpacity =.7,
                   color= NA)
   })
-  
-  #Observe terrestrial significant habitat filter changes
-  observeEvent(input$terrestrial, {
-    leafletProxy("map", data= tr_data()) %>% 
-      addPolygons(data=terrestrial_lyr, 
-                  fillColor= ~tr5(TerrHabRan),
-                  fillOpacity =.7,
-                  color= NA)
-  })
-
 }
 
 
