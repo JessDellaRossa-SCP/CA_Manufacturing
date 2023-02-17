@@ -87,9 +87,9 @@ ui <- fluidPage(
                    h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
                    leafletOutput("map", height = "800px")
                    ))),
-      #Panel for data table ----
+      #Panel for manufacturing data table ----
       tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table")),
-      #Panel for data table ----
+      #Panel for chemical data table ----
       tabPanel(id = "chemicaltable", title = "Chemical Data Table", fluid = TRUE, icon=icon("flask")),
       #Panel for tool instructions ----
       tabPanel(id = "howto", title = "How to Use This Tool", fluid = TRUE, icon= icon("question"),
