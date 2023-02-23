@@ -1,0 +1,47 @@
+---
+output: 
+  html_document:
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+
+Chemical and product manufacturing activities are often sources of air, water, or soil pollution, impacting vulnerable disadvantaged communities and thus raising environmental justice concerns. These manufacturing emissions may also affect California’s precious aquatic resources and other sensitive ecosystems. This project provides a resource that can help the [Safer Consumer Products](https://dtsc.ca.gov/scp/safer-consumer-products-program-overview/) (SCP) Program prioritize addressing adverse impacts associated with California-based consumer product manufacturing and related emissions. 
+
+## Goal and Intended Use of this Tool
+
+The goal of this interactive mapping tool is to compile data on consumer product manufacturing activities in California in order to help identify manufacturing-related emissions that may especially impact disadvantaged communities and sensitive ecosystems. This tool is intended to be used as a high-level mapping tool that displays manufacturing facilities of interest to SCP in areas characterized by the presence of disadvantaged communities or significant natural habitats. Please refer to the “About the Datasets” tab to learn more about how these areas are defined.
+
+The tool identifies the following:
+
+ 1. Longitude and latitude data for consumer product manufacturing activities in California.
+ 2.	Areas where these manufacturing facilities overlap with communities and ecosystems that are most vulnerable to the cumulative impacts of manufacturing.
+ 3.	Consumer product categories that are manufactured in California.
+ 4.	Candidate Chemicals used or emitted by consumer product manufacturing activities in California.
+ 
+These data can help inform the Safer Consumer Products Program, including in its planning and prioritization. As such, the intended audience of this tool is SCP and should be utilized as a launching point for further research.
+
+## Limitations
+
+This tool relies on reported data by various government institutions on differing time scales and does not include modelling of cumulative impacts. This tool is not intended to provide comprehensive representations of the risk of chemical exposure for communities or ecosystems. Due to its limitations, this tool should not be used to impose regulatory requirements on specific manufacturers without additional research.
+
+In addition, this application is limited by the quantity and quality of the datasets used. For example, not all datasets contain chemical information for facilities and the datasets with chemical information have different reporting thresholds. Some of the chemical information reported does not indicate if the chemicals are actually emitted or simply stored on site. 
+It is also not possible to conclusively link chemicals to specific products with the available data.  This app uses NAICS and SIC information to determine product categories. Facilities self-report this information and it may not accurately describe all manufacturing activities. Some facilities make more than one product and have multiple NAICS or SIC codes. Conversely, many NAICS and SIC descriptions include a range of products. Please refer to the “About the Datasets” section for more information.
+
+Each Shiny App deployed in the cloud can only store 1 Gb of information and can only be accessed for 25 active hours per month. Due to this storage size of 1Gb, some datasets were subset to decrease storage size and increase efficiency of the app. Specifically, the original aquatic and terrestrial significant habitat datasets both store ranks from 0-5. The datasets were subset to only show ranks 4-5 on the map because these are of most interest to SCP and allow the app to run at a faster rate. No other datasets were altered beyond what is described in the data analysis section.
+
+## Definitions
+
+According to California Code of Regulations, Title 22, Division 4.5, [Chapter55](https://casetext.com/regulation/california-code-of-regulations/title-22-social-security/division-45-environmental-health-standards-for-the-management-of-hazardous-waste/chapter-55-safer-consumer-products), [§ 69501.1](https://casetext.com/regulation/california-code-of-regulations/title-22-social-security/division-45-environmental-health-standards-for-the-management-of-hazardous-waste/chapter-55-safer-consumer-products/article-1-general/section-695011-definitions) **“consumer product”** is defined as a product or part of the product that is used, brought, or leased for use by a person for any purposes, or when applicable, a component of an assembled consumer product. The following products are exempt from the definition: prescription drugs and their packaging, dental restorative materials and their packaging, medical devices and their packaging, food and drink items, and pesticides.
+
+The California Code of Regulations, Title 22, Division 4.5, Chapter 55, [§ 69502.2](https://casetext.com/regulation/california-code-of-regulations/title-22-social-security/division-45-environmental-health-standards-for-the-management-of-hazardous-waste/chapter-55-safer-consumer-products/article-2-process-for-identifying-candidate-chemicals/section-695022-candidate-chemicals-identification), defines a **“Candidate Chemical”** as a chemical that exhibits a hazard trait or an environmental or toxicological endpoint, and is contained on one or more specified authoritative lists. The Department of Toxic Substances Control (DTSC) can also add Candidate Chemicals to the list through a regulatory process that, among other factors, gives special consideration to the potential for the chemical to contribute to or cause adverse impacts for:
+
+ * Sensitive sub-populations
+ * Environmentally sensitive habitats;
+ * Endangered and threatened species listed by the California Department of Fish and Wildlife; and
+ * Environments in California that have been designated as impaired by a California State or federal regulatory agency.
+
