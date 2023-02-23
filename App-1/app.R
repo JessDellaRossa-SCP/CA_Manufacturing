@@ -11,6 +11,7 @@ library(ggspatial)
 library(viridis)
 library(leaflet)
 library(DT)
+library(knitr)
 
 
 #Load files ---------
@@ -42,9 +43,9 @@ ui <- fluidPage(
                sidebarLayout(
                  sidebarPanel(
                    #Panel options for Significant Habitat Rankings
-                   titlePanel("Desired Significant Habitat Ranking"),
+                   titlePanel("Significant Habitat Rankings"),
                    #Instructions for reader
-                   helpText("Explore California's aquatic and terrestrial significant habitats through rank filters. See the 'About Datasets' tab for more information."),
+                   helpText("Explore California's aquatic and terrestrial significant habitats through rank filters. See the 'About the Datasets' tab for more information."),
                    fluidRow(column(8,
                                    #Select which rank(s) to plot
                                    checkboxGroupInput("aquatic", 
@@ -58,7 +59,7 @@ ui <- fluidPage(
                                    )),
                    hr(),
                    #Panel options for Product Categories
-                   titlePanel("Desired Potential Product Category"),
+                   titlePanel("Product Category"),
                    #Instructions for reader
                    helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
                    fluidRow(column(8,
@@ -95,37 +96,12 @@ ui <- fluidPage(
       tabPanel(id = "howto", title = "How to Use This Tool", fluid = TRUE, icon= icon("question"),
                fluidRow(column(6,
                                HTML("<title> How to Use This Tool </title>")),
-                        column(12,
-                               #text
-                               tags$div(HTML("<h4> <b> Purpose  </b> </h4>
-                               <p> This web application is an interactive mapping tool that 
-                            allows users to blah blah."))))),
+                        uiOutput('markdown'))),
       #Panel describing datasets ----
-      tabPanel(id = "about", title = "About Datasets", fluid = TRUE, icon= icon("database"),
+      tabPanel(id = "about", title = "About the Datasets", fluid = TRUE, icon= icon("database"),
                fluidRow(column(6,
-                               HTML("<title> About Datasets </title>")),
-                        column(12,
-                               #text
-                               tags$div(HTML("<h4> <b> Manufacturing Datasets  </b> </h4> <ul>
-                               <p> <li> <em> FRS – Facility Registry Services </em> DESCRIBE DATASET </li>
-                               <li> <em> TRI - Toxic Release Inventory </em> DESCRIBE DATASET </li>
-                               <li> <em> EIS - Emissions Inventory System </em> DESCRIBE DATASET </li>
-                               <li> <em> CERS - California Environmental Registry Systems </em> DESCRIBE DATASET </li> </ul>  </p>
-                               <hr>
-                               <h4> <b> Chemical Information </b> </h4>
-                               <p> ENTER CHEM INFO HERE </p>
-                               <hr>
-                               <h4> <b> Product Categories  </b> </h4>
-                               <p> Categories are based on NAICS and SIC codes </p>
-                               <hr>
-                               <h4> <b> Disadvantaged Communities from SB 535 </b> </h4>
-                               <p> This interactive map tool utilizes.... </p>
-                               <hr>
-                               <h4> <b> Significant Habitats  </b> </h4> <ul>
-                               <p> <li> <em> Aquatic Significant Habitats </em> DESCRIBE DATASET </li>
-                               <p> <li> <em> Terrestrial Significant Habitats </em> DESCRIBE DATASET </li> </ul> </p>
-                               <hr>
-                                             "))))),
+                               HTML("<title> About the Datasets </title>")),
+                        uiOutput('markdown.about'))),
       #Panel describing project methods ----
       tabPanel(id = "methods", title = "Methods", fluid = TRUE, icon = icon("gear"),
                fluidRow(column(6,
@@ -209,6 +185,16 @@ server <- function(input, output, session) {
                   fillColor= ~tr5(input$terrestrial),
                   fillOpacity =.7,
                   color= NA)
+  })
+  
+  #Output text for "How to Use this Tool" markdown
+  output$markdown <- renderUI({
+    HTML(markdown::markdownToHTML(knit('how_to_use.rmd', quiet = TRUE)))
+  })
+  
+  #Output text for "About the Datasets" markdown
+  output$markdown.about <- renderUI({
+    HTML(markdown::markdownToHTML(knit('about_datasets.rmd', quiet = TRUE)))
   })
 }
 
