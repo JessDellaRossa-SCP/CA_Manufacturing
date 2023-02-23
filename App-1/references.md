@@ -1,0 +1,23 @@
+---
+output: 
+  html_document:
+    theme: flatly
+---
+
+
+
+## The Team
+
+This interactive mapping tool was developed for Safer Consumer Products Program of the California Department of Toxic Substances Control by two graduate Student Research Assistants, [Jessica DellaRossa](https://www.linkedin.com/in/jessica-dellarossa-311ba0144/) and [Elena Galkina](https://www.linkedin.com/in/elena-galkina-538365212/). Jessica served as the project manager and completed this project as part of her Master’s degree from UC Davis in [Environmental Policy & Management](https://epm.ucdavis.edu/).
+
+A special thanks to the sponsor team and project consultants for supporting this project from start to finish with many brainstorming sessions, hours of revision, and offering advice along the way.
+
+**SCP Sponsor Team:** Simona Bălan, Michael Ernst, Christopher Leonetti, Abigail Noble, Nancy Ostrom, André Algazi, Karl Palmer
+
+**SCP Consultants:** Brian Chung, Diana Phelps, Gabrielle Rigutto
+
+## Further Readings
+
+ * About [Senate Bill 535 Disadvantaged Communities designation](https://oehha.ca.gov/calenviroscreen/sb535)
+ * About California Department of Fish & Wildlife's [Significant Habitats](https://wildlife.ca.gov/Data/Analysis/ACE#523731771-significant-habitats)
+ * About U.S. Census Bureau [Industry Classification System](https://www.census.gov/naics/)
