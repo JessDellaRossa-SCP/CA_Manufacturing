@@ -96,37 +96,17 @@ ui <- fluidPage(
       tabPanel(id = "howto", title = "How to Use This Tool", fluid = TRUE, icon= icon("question"),
                fluidRow(column(6,
                                HTML("<title> How to Use This Tool </title>")),
-                        uiOutput('markdown'))),
+                        uiOutput("markdown"))),
       #Panel describing datasets ----
       tabPanel(id = "about", title = "About the Datasets", fluid = TRUE, icon= icon("database"),
                fluidRow(column(6,
                                HTML("<title> About the Datasets </title>")),
-                        uiOutput('markdown.about'))),
+                        uiOutput("markdown.about"))),
       #Panel describing project methods ----
       tabPanel(id = "methods", title = "Methods", fluid = TRUE, icon = icon("gear"),
                fluidRow(column(6,
                                HTML("<title> Methods </title>")),
-                        column(12,
-                               #text
-                               tags$div(HTML("<h4> <b> Project Goals  </b> </h4> <ul>
-                               <p> <li> <em> Goal 1 </em> DESCRIBE GOAL </li>
-                               <li> <em> Goal 2 </em> DESCRIBE GOAL </li>
-                               <li> <em> Goal 3 </em> DESCRIBE GOAL </li>
-                               <li> <em> Goal 4 </em> DESCRIBE GOAL </li> </ul>  </p>
-                               <hr>
-                               <h4> <b> Data Compilation </b> </h4>
-                               <p> Why did we choose these datasets? </p>
-                               <hr>
-                               <h4> <b> Data Analysis  </b> </h4>
-                               <p> Do not describe everything </p>
-                               <hr>
-                               <h4> <b> Product Categories </b> </h4>
-                               <p> Methods for choosing categories. </p>
-                               <hr>
-                               <h4> <b> GitHub  </b> </h4> 
-                               <p> add link to GitHub??? </p>
-                               <hr>
-                                             "))))),
+                        uiOutput("markdown.methods"))),
       tabPanel(id = "references", title = "References", fluid= TRUE, icon = icon("circle-info"),
                fluidRow(column(6,
                                HTML("<title> References </title>")),
@@ -134,15 +114,8 @@ ui <- fluidPage(
                                #text
                                tags$div(HTML("<a href = 'https://dtsc.ca.gov/scp/'>
                                <img src= 'SCP_Logo.png' width = '128' height = '98.5'style=' margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px' /> </a>
-                               <hr>
-                               <h4> <b> Team Members  </b> </h4> <ul>
-                               <p> <li> <b> Jessica DellaRossa: Project Manager </b> </li>
-                               <li> Elena Galkina  </li>
-                               <li> SCP Sponsors: </li></p>
-                               <hr>
-                               
-                               <hr>
-                                             ")))))
+                               <hr>"))),
+                        uiOutput("markdown.references")))
       
 ))
       
@@ -189,16 +162,25 @@ server <- function(input, output, session) {
   
   #Output text for "How to Use this Tool" markdown
   output$markdown <- renderUI({
-    HTML(markdown::markdownToHTML(knit('how_to_use.rmd', quiet = TRUE)))
+    HTML(markdown::markdownToHTML(knit('how_to_use.rmd', quiet = TRUE),fragment.only = T ))
   })
   
   #Output text for "About the Datasets" markdown
   output$markdown.about <- renderUI({
-    HTML(markdown::markdownToHTML(knit('about_datasets.rmd', quiet = TRUE)))
+    HTML(markdown::markdownToHTML(knit("about_datasets.rmd", quiet=T), fragment.only = T))
   })
+  
+  #Output text for "Methods" markdown
+  output$markdown.methods <- renderUI({
+    HTML(markdown::markdownToHTML(knit("methods.rmd", quiet=T), fragment.only = T))
+  })
+  
+  #Output text for "References" markdown
+  output$markdown.references <- renderUI({
+    HTML(markdown::markdownToHTML(knit("references.rmd", quiet=T), fragment.only = T))
+  })
+
 }
-
-
 # Run the application 
 shinyApp(ui = ui, server = server)
 
