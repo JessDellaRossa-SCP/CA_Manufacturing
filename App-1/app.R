@@ -12,6 +12,9 @@ library(viridis)
 library(leaflet)
 library(DT)
 library(knitr)
+library(pals)
+library(leaflegend)
+library(readxl)
 
 
 #Load files ---------
@@ -21,12 +24,21 @@ setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 terrestrial_lyr<- st_read("Ter_hab_4_5.shp")
 aquatic_lyr <- st_read("Aqu_hab_4_5.shp")
 
+#Read in data for data tables
+manufacturers_data <- read_excel("facilities_shiny.xlsx")
+
+#Create product category choices
+prod_cat_choices <- c("Beauty, Personal Care, and Hygiene Products", "Building Products & Materials Used in Construction and Renovation", "Chemical Manufacturing", "Children's Products",
+                      "Cleaning Products", "Electrical Equipment Manufacturing", "Food Packaging", "Household, School, and Workplace Furnishings", "Machinery Manufacturing", "Medical Equipment Manufacturing",
+                      "Metal Manufacturing", "Miscellaneous Manufacturing", "Motor Vehicle Tires", "Paper Manufacturing", "Pharmaceuticals", "Plastics Product Manufacturing", "Textiles",
+                      "Tobacco Manufacturing", "Transportation Manufacturing") 
+
 #Change the projections of these datasets to match WGS84 projection for leaflet.
-aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +datum=WGS84"))
-terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +datum=WGS84"))
+aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
 
 #set color palettes for maps.
-#Look into making this reactive!
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
 tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
 
@@ -35,6 +47,7 @@ tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
 ui <- fluidPage(
   tags$div(tags$style(HTML( ".selectize-dropdown, .selectize-dropdown.form-control{z-index:10000;}"))),
   theme = shinytheme("flatly"),
+  
   #Interactive Map Page ---- 
   navbarPage("California Manufacturing Activity Project",
              id = "home",
@@ -66,42 +79,48 @@ ui <- fluidPage(
                                    #Select product categories to show on map
                                    checkboxGroupInput("products", 
                                                       h4("Potential Product Categories"), 
-                                                      choices = list("Beauty, Personal Care, and Hygiene Products" = 0,
-                                                                     "Building Products & Materials Used in Construction and Renovation" = 0,
-                                                                     "Chemical Manufacturing" = 0,
-                                                                     "Children's Products" = 0,
-                                                                     "Cleaning Products" = 0,
-                                                                     "Electrical Equipment Manufacturing" = 0,
-                                                                     "Food Packaging" = 0,
-                                                                     "Household, School, and Workplace Furnishings" = 1,
-                                                                     "Machinery Manufacturing" = 0,
-                                                                     "Medical Equipment Manufacturing" = 0,
-                                                                     "Metal Manufacturing" = 0,
-                                                                     "Motor Vehicle Tires" = 0,
-                                                                     "Paper Manufacturing" = 0,
-                                                                     "Plastics Product Manufacturing" = 0,
-                                                                     "Textiles" = 0,
-                                                                     "Transportation Manufacturing" = 0),)
+                                                      choices = c(prod_cat_choices))
                    ))),
                  #Output interactive mapping
                  mainPanel(
                    h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
                    leafletOutput("map", height = "800px")
                    ))),
+      
       #Panel for manufacturing data table ----
-      tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table")),
+      tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table"),
+               #Options for left-hand side bar
+               sidebarLayout(
+                 sidebarPanel(
+                   width = 4,
+                   titlePanel("California Manufacturers"),
+                   helpText("Check Product Category box to see relevant manufacturers"),
+                   fluidRow(column(8,
+                                   checkboxGroupInput("ProductCategories",
+                                                      label = "Product Categories",
+                                                      choices = c(prod_cat_choices))
+               ))),
+               mainPanel(
+                 h2("Manufacturer Data Table", align = "center", style = "color:#00819D"),
+                 DT::dataTableOutput("mantable"), style = "font-size:80%",
+                 downloadButton("download_mandata", "Download filtered data"))
+               )),
+      
       #Panel for chemical data table ----
       tabPanel(id = "chemicaltable", title = "Chemical Data Table", fluid = TRUE, icon=icon("flask")),
+      
       #Panel for tool instructions ----
       tabPanel(id = "howto", title = "How to Use This Tool", fluid = TRUE, icon= icon("question"),
                fluidRow(column(6,
                                HTML("<title> How to Use This Tool </title>")),
                         uiOutput("markdown"))),
+      
       #Panel describing datasets ----
       tabPanel(id = "about", title = "About the Datasets", fluid = TRUE, icon= icon("database"),
                fluidRow(column(6,
                                HTML("<title> About the Datasets </title>")),
                         uiOutput("markdown.about"))),
+      
       #Panel describing project methods ----
       tabPanel(id = "methods", title = "Methods", fluid = TRUE, icon = icon("gear"),
                fluidRow(column(6,
@@ -159,6 +178,36 @@ server <- function(input, output, session) {
                   fillOpacity =.7,
                   color= NA)
   })
+  
+  #manufacturer data check all
+  filtered_manufacturers_data <- reactive({
+    if("Check all" %in% input$ProductCategories) {
+      filtered_manufacturers_data <- manufacturers_data
+    } else {
+      filtered_manufacturers_data <- manufacturers_data[manufacturers_data$"Product_Category" %in% input$ProductCategories, ]
+    }
+    return(filtered_manufacturers_data)
+  })
+  
+  #Render manufacturer data table based on filtered data
+  output$mantable <- DT::renderDataTable({
+    DT::datatable(
+      filtered_manufacturers_data(), filter = "top",
+      class = "cell-border stripe",
+      options = list(autoWidth = TRUE)
+    )
+  })
+  
+  #download manufacturer data
+  output$download_mandata <- downloadHandler(
+    filename = function() {
+      paste("manufacturers_data_", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      #write filtered data to a CSV file
+      write.csv(filtered_manufacturers_data(), file, row.names = FALSE)
+    }
+  )
   
   #Output text for "How to Use this Tool" markdown
   output$markdown <- renderUI({
