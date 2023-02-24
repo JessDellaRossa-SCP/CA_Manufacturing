@@ -26,6 +26,21 @@ aquatic_lyr <- st_read("Aqu_hab_4_5.shp")
 
 #Read in data for data tables
 manufacturers_data <- read_excel("facilities_shiny.xlsx")
+chemical_data <- read_excel("chemical_data.xlsx")
+
+#Read in facilities shapefile and create lat/long
+facilities <- st_read("facilitylist.shp")
+
+#This code creates longitude and latitude columns from the geometry information stored within the .shp.
+coord <- 
+  unlist(st_geometry(facilities)) %>% 
+  matrix(ncol=2,byrow=TRUE) %>% 
+  as_tibble() %>% 
+  setNames(c("lon","lat"))
+
+#This code binds the columns of coordinates to the facilities.
+facilities <- bind_cols(facilities, coord)
+
 
 #Create product category choices
 prod_cat_choices <- c("Beauty, Personal Care, and Hygiene Products", "Building Products & Materials Used in Construction and Renovation", "Chemical Manufacturing", "Children's Products",
@@ -36,12 +51,12 @@ prod_cat_choices <- c("Beauty, Personal Care, and Hygiene Products", "Building P
 #Change the projections of these datasets to match WGS84 projection for leaflet.
 aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-
+facilities <-st_transform(facilities, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
 #set color palettes for maps.
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
 tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
-
+prod.cat <- colorFactor(polychrome(20), domain = facilities$Prdct_C)
 
 ### Create User Interface -------
 ui <- fluidPage(
@@ -55,6 +70,16 @@ ui <- fluidPage(
                #Options on left-hand side for map
                sidebarLayout(
                  sidebarPanel(
+                   #Panel options for Product Categories
+                   titlePanel("Product Category"),
+                   #Instructions for reader
+                   helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
+                   fluidRow(column(8,
+                                   #Select product categories to show on map
+                                   checkboxGroupInput("products", 
+                                                      h4("Potential Product Categories"), 
+                                                      choices = c(prod_cat_choices)))),
+                   hr(),
                    #Panel options for Significant Habitat Rankings
                    titlePanel("Significant Habitat Rankings"),
                    #Instructions for reader
@@ -71,16 +96,17 @@ ui <- fluidPage(
                                                                      "Rank 4" = 4))
                                    )),
                    hr(),
-                   #Panel options for Product Categories
-                   titlePanel("Product Category"),
+                   #Panel Options for Disadvantaged Communities
+                   titlePanel("Within Disadvantaged Community Tract"),
                    #Instructions for reader
-                   helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
+                   helpText("Select to viw tracts identified as disadvantaged communities. See the 'About the Datasets' tab for more information"),
                    fluidRow(column(8,
-                                   #Select product categories to show on map
-                                   checkboxGroupInput("products", 
-                                                      h4("Potential Product Categories"), 
-                                                      choices = c(prod_cat_choices))
-                   ))),
+                                   #Select yes or no
+                                   checkboxGroupInput("dacs",
+                                                      h4("Disadvantaged Community Tracts"),
+                                                      choices = c("Yes", "No"))))
+                   
+                   ),
                  #Output interactive mapping
                  mainPanel(
                    h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
@@ -107,10 +133,35 @@ ui <- fluidPage(
                )),
       
       #Panel for chemical data table ----
-      tabPanel(id = "chemicaltable", title = "Chemical Data Table", fluid = TRUE, icon=icon("flask")),
+      tabPanel(id = "chemicaltable", title = "Chemical Data Table", fluid = TRUE, icon=icon("flask"),
+               #Options for left-hand side bar:
+               sidebarLayout(
+                 sidebarPanel(
+                   width = 4,
+                   titlePanel("Candidate Chemicals"),
+                   helpText("Shows only chemicals that are on the Candidate Chemicals List"),
+                   fluidRow(column(8,
+                                   checkboxGroupInput("Candidate Chemicals",
+                                                      label = "Candidate Chemicals",
+                                                      choices = c("Yes", "No"))
+                                   )),
+                   hr(),
+                   titlePanel("Poly- and Perfluoroalkyl Substances (PFAS)"),
+                   fluidRow(column(8,
+                                   checkboxGroupInput("PFAS",
+                                                      label = "PFAS",
+                                                      choices = c("Yes", "No"))
+                                   ))
+                 ),
+                 mainPanel(
+                   h2("Chemical Data", align = "center", style = "color:#00819D"),
+                   DT::dataTableOutput("chemtable"), style = "font-size:80%",
+                   downloadButton("download_chemdata", "Download filtered chemical data")
+                 )
+               )),
       
       #Panel for tool instructions ----
-      tabPanel(id = "howto", title = "How to Use This Tool", fluid = TRUE, icon= icon("question"),
+      tabPanel(id = "howto", title = "About This Tool", fluid = TRUE, icon= icon("question"),
                fluidRow(column(6,
                                HTML("<title> How to Use This Tool </title>")),
                         uiOutput("markdown"))),
@@ -141,6 +192,11 @@ ui <- fluidPage(
 # Define server logic 
 server <- function(input, output, session) {
   
+  #Reactive expression for manufacturing facilities product categories
+  man_fac <- reactive({
+    filter(facilities[facilities$Prdct_C %in% input$products, ])
+  })
+  
   #Reactive expression for the aquatic layer rank selected by the user
   aq_data <- reactive({
     filter(aquatic_lyr[aquatic_lyr$AqHabRank %in% input$aquatic, ])
@@ -166,7 +222,8 @@ server <- function(input, output, session) {
   
   #Observe aquatic significant habitat filter changes
   observeEvent({input$aquatic
-    input$terrestrial}, {
+    input$terrestrial
+    input$products}, {
     leafletProxy("map") %>% 
       clearShapes() %>% 
       addPolygons(data=aq_data(), 
@@ -176,7 +233,45 @@ server <- function(input, output, session) {
       addPolygons(data=tr_data(),
                   fillColor= ~tr5(input$terrestrial),
                   fillOpacity =.7,
-                  color= NA)
+                  color= NA) %>% 
+      addCircles(data = man_fac(),
+                 color= ~prod.cat(input$products),
+                 stroke = FALSE,
+                 fillOpacity = 1,
+                 weight = 1,
+                 label = facilities$prgrm__,
+                 radius= 400)
+  })
+  
+  #Define reactive data based on user inputs. Return full data set if no filters selected
+  filtered_chemical_data <- reactive({
+    if (is.null(chemical_data$"Candidate Chemical") && is.null(chemical_data$PFAS)){
+      return(chemical_data)
+    }
+    #Apply filter to PFAS
+    if ("Yes" %in% input$PFAS) {
+      chemical_data <- chemical_data[chemical_data$PFAS != "No", ]
+    } else if ("No" %in% input$PFAS) {
+      chemical_data <- chemical_data[chemical_data$PFAS == "No", ]
+    }
+    
+    #Apply filter for Candidate Chemicals
+    if ("Yes" %in% input$'Candidate Chemicals') {
+      chemical_data <- chemical_data[chemical_data$"Candidate Chemical" == "Yes", ]
+    } else if ("No" %in% input$'Candidate Chemicals') {
+      chemical_data <- chemical_data[chemical_data$"Candidate Chemical" == "No or unknown", ]
+    }
+    #Return filtered data set
+    return(chemical_data)
+  })
+  
+  #Render data table based on filtered chemical data
+  output$chemtable <- DT::renderDataTable({
+    DT::datatable(
+      filtered_chemical_data(), filter = "top", 
+      class = "cell-border stripe",
+      options = list(autoWidth = TRUE)
+    )
   })
   
   #manufacturer data check all
@@ -206,6 +301,17 @@ server <- function(input, output, session) {
     content = function(file) {
       #write filtered data to a CSV file
       write.csv(filtered_manufacturers_data(), file, row.names = FALSE)
+    }
+  )
+  
+  #download chemical data
+  output$download_chemdata <- downloadHandler(
+    filename = function() {
+      paste("candidate_chem_data_", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      #write filtered data to a CSV file
+      write.csv(filtered_chemical_data(), file, row.names = FALSE)
     }
   )
   
