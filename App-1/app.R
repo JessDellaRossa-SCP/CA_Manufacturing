@@ -1,8 +1,8 @@
 #### Shiny App for Exploring Manufacturing Activity in California ####
 
-rm(list = ls())
+
 #load packages -----------
-library(shiny)
+#library(shiny)
 library(shinythemes)
 library(tidyverse)
 library(sf)
@@ -16,7 +16,7 @@ library(readxl)
 
 
 #Load files ---------
-setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
+#setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
 #Read in shapefiles for map
 terrestrial_lyr<- st_read("Ter_hab_4_5.shp")
