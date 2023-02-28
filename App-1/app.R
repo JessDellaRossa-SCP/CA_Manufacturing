@@ -16,7 +16,6 @@ library(readxl)
 
 
 #Load files ---------
-#setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 
 #Read in shapefiles for map
 terrestrial_lyr<- st_read("Ter_hab_4_5.shp")
