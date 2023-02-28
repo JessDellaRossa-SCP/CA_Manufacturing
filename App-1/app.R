@@ -6,7 +6,6 @@
 library(shinythemes)
 library(tidyverse)
 library(sf)
-library(viridis)
 library(leaflet)
 library(DT)
 library(knitr)
@@ -52,10 +51,10 @@ prod_cat_choices <- c("Beauty, Personal Care, and Hygiene Products", "Building P
                       "Tobacco Manufacturing", "Transportation Manufacturing") 
 
 #Change the projections of these datasets to match WGS84 projection for leaflet.
-aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-facilities <-st_transform(facilities, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-dacs <-st_transform(dacs, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+aquatic_lyr <- st_transform(aquatic_lyr, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+terrestrial_lyr <- st_transform(terrestrial_lyr, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+facilities <-st_transform(facilities, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+dacs <-st_transform(dacs, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 
 #set color palettes for maps.
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
