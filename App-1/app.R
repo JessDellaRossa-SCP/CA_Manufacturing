@@ -6,8 +6,6 @@ library(shiny)
 library(shinythemes)
 library(tidyverse)
 library(sf)
-library(rgdal)
-library(ggspatial)
 library(viridis)
 library(leaflet)
 library(DT)
@@ -23,8 +21,7 @@ setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/App-1/app_data")
 #Read in shapefiles for map
 terrestrial_lyr<- st_read("Ter_hab_4_5.shp")
 aquatic_lyr <- st_read("Aqu_hab_4_5.shp")
-dacs <- st_read("dacs.shp")
-tribal_bound <- st_read("tribal_bound.shp")
+dacs <- st_read("535_dacs.shp")
 
 #Read in data for data tables
 manufacturers_data <- read_excel("facilities_shiny.xlsx")
@@ -46,12 +43,7 @@ facilities <- bind_cols(facilities, coord)
 #This chunk of code creates labels for polygons for the leaflet map
 dac_label <- sprintf(
   "<h2>%s</h2>",
-  dacs$ApproxLoc) %>% 
-  lapply(htmltools::HTML)
-
-tribal_label <- sprintf(
-  "<h2>%s</h2>",
-  tribal_bound$Name) %>% 
+  dacs$ApprxLc) %>% 
   lapply(htmltools::HTML)
 
 #Create product category choices
@@ -65,14 +57,12 @@ aquatic_lyr <- st_transform(aquatic_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=
 terrestrial_lyr <- st_transform(terrestrial_lyr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 facilities <-st_transform(facilities, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 dacs <-st_transform(dacs, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-tribal_bound <-st_transform(tribal_bound, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
 #set color palettes for maps.
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
 tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
 prod.cat <- colorFactor(polychrome(20), domain = facilities$Prdct_C)
-tribe_col <- colorFactor("#de2d26", domain = tribal_bound$GEOID)
-dacs_col <- colorFactor("#006837", domain = dacs$Tract)
+dacs_col <- colorFactor(c("#c51b8a", "#1c9099"), domain = dacs$DAC_cat)
 
 ### Create User Interface -------
 ui <- fluidPage(
@@ -120,7 +110,8 @@ ui <- fluidPage(
                                    #Select yes or no
                                    checkboxGroupInput("dacs",
                                                       h4("Disadvantaged Community Tracts"),
-                                                      choices = c("Yes", "No"))))
+                                                      choices = c("Tribal Boundary" = "Tribal Boundary", 
+                                                                  "DAC Census Tract" = "CalEnviroScreen Score"))))
                    
                    ),
                  #Output interactive mapping
@@ -225,7 +216,7 @@ server <- function(input, output, session) {
   
   #Reactive expression for dacs layer selected by the user
   dac_data <- reactive({
-    filter(dacs[dacs$Tract %in% input$dacs])
+    filter(dacs[dacs$DAC_cat %in% input$dacs, ])
   })
   
   #base map -- 
@@ -256,23 +247,23 @@ server <- function(input, output, session) {
                   fillColor= ~tr5(input$terrestrial),
                   fillOpacity =.7,
                   color= NA) %>% 
-      addCircles(data = man_fac(),
-                 color= ~prod.cat(input$products),
-                 stroke = FALSE,
-                 fillOpacity = 1,
-                 weight = 1,
-                 label = facilities$prgrm__,
-                 radius= 400) %>% 
-        addPolygons(data=dacs_data(),
+        addPolygons(data=dac_data(),
                     fillColor=~dacs_col(input$dacs),
-                    fillOpacity = 0.9,
-                    color = "#1f78b4",
+                    fillOpacity = 0.4,
+                    color = "#000000",
                     weight =1,
                     label = dac_label,
                     labelOptions = labelOptions(
                       style = list("font-weight" = "normal",padding = "3px 8px"),
                       textsize = "15px",
-                      direction = "auto"))
+                      direction = "auto")) %>% 
+        addCircles(data = man_fac(),
+                   color= ~prod.cat(input$products),
+                   stroke = FALSE,
+                   fillOpacity = 1,
+                   weight = 1,
+                   label = facilities$Prdct_C,
+                   radius= 40)
   })
   
   #Define reactive data based on user inputs. Return full data set if no filters selected
