@@ -1,6 +1,6 @@
 #### Shiny App for Exploring Manufacturing Activity in California ####
 
-
+getwd()
 #load packages -----------
 #library(shiny)
 library(shinythemes)
@@ -338,22 +338,22 @@ server <- function(input, output, session) {
   
   #Output text for "How to Use this Tool" markdown
   output$markdown <- renderUI({
-    HTML(markdown::markdownToHTML(knit('how_to_use.rmd', quiet = TRUE),fragment.only = T ))
+    HTML(markdown::markdownToHTML(knit('how_to_use.Rmd', quiet = TRUE),fragment.only = T ))
   })
   
   #Output text for "About the Datasets" markdown
   output$markdown.about <- renderUI({
-    HTML(markdown::markdownToHTML(knit("about_datasets.rmd", quiet=T), fragment.only = T))
+    HTML(markdown::markdownToHTML(knit("about_datasets.Rmd", quiet=T), fragment.only = T))
   })
   
   #Output text for "Methods" markdown
   output$markdown.methods <- renderUI({
-    HTML(markdown::markdownToHTML(knit("methods.rmd", quiet=T), fragment.only = T))
+    HTML(markdown::markdownToHTML(knit("methods.Rmd", quiet=T), fragment.only = T))
   })
   
   #Output text for "References" markdown
   output$markdown.references <- renderUI({
-    HTML(markdown::markdownToHTML(knit("references.rmd", quiet=T), fragment.only = T))
+    HTML(markdown::markdownToHTML(knit("references.Rmd", quiet=T), fragment.only = T))
   })
 
 }
