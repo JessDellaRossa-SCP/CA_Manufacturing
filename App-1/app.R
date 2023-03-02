@@ -40,9 +40,15 @@ facilities <- bind_cols(facilities, coord)
 
 #This chunk of code creates labels for polygons for the leaflet map
 dac_label <- sprintf(
-  "<h2>%s</h2>",
+  "<h6>%s</h6>",
   dacs$ApprxLc) %>% 
   lapply(htmltools::HTML)
+
+fac_lab <- sprintf(
+  "<h6>%s</h6>",
+  facilities$Prdct_C) %>% 
+  lapply(htmltools::HTML)
+
 
 #Create product category choices
 prod_cat_choices <- c("Beauty, Personal Care, and Hygiene Products", "Building Products & Materials Used in Construction and Renovation", "Chemical Manufacturing", "Children's Products",
@@ -98,19 +104,7 @@ ui <- fluidPage(
                                                              h4("Terrestrial Significant Habitat Rank"), 
                                                              choices = list("Rank 5" = 5,
                                                                             "Rank 4" = 4))
-                          )),
-                          hr(),
-                          #Panel Options for Disadvantaged Communities
-                          titlePanel("Within Disadvantaged Community Tract"),
-                          #Instructions for reader
-                          helpText("Select to viw tracts identified as disadvantaged communities. See the 'About the Datasets' tab for more information"),
-                          fluidRow(column(8,
-                                          #Select yes or no
-                                          checkboxGroupInput("dacs",
-                                                             h4("Disadvantaged Community Tracts & Tribal"),
-                                                             choices = c("Tribal Boundary" = "Tribal Boundary", 
-                                                                         "DAC Census Tract" = "CalEnviroScreen Score"))))
-                          
+                          ))
                         ),
                         #Output interactive mapping
                         mainPanel(
@@ -227,14 +221,29 @@ server <- function(input, output, session) {
   #rendering map --
   output$map <- renderLeaflet({
     mapbase() %>% 
-      addProviderTiles(providers$Stamen.Terrain, group = "Terrain")
+      addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>% 
+      addPolygons(data = dacs,
+                  fillColor= ~dacs_col(DAC_cat),
+                  fillOpacity = 0.4,
+                  color= "black",
+                  weight=1,
+                  group = "DACs",
+                  label = dac_label,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal",padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto")) %>% 
+      addLegendFactor(position = "bottomright",
+                      pal = dacs_col,
+                      title = "DAC Type",
+                      shape = "rect",
+                      values = dacs$DAC_cat)
   })
   
   #Observe aquatic significant habitat filter changes
   observeEvent({input$aquatic
     input$terrestrial
-    input$products
-    input$dacs}, {
+    input$products}, {
       leafletProxy("map") %>% 
         clearShapes() %>% 
         addPolygons(data=aq_data(), 
@@ -245,24 +254,21 @@ server <- function(input, output, session) {
                     fillColor= ~tr5(input$terrestrial),
                     fillOpacity =.7,
                     color= NA) %>% 
-        addPolygons(data=dac_data(),
-                    fillColor= ~dacs_col(input$dacs),
+        addPolygons(data=dacs,
+                    fillColor= ~dacs_col(DAC_cat),
                     fillOpacity = 0.4,
                     color = "#000000",
                     weight =1,
-                    label = dac_label,
-                    labelOptions = labelOptions(
-                      style = list("font-weight" = "normal",padding = "3px 8px"),
-                      textsize = "15px",
-                      direction = "auto")) %>% 
+                    label = dac_label) %>% 
         addCircles(data = man_fac(),
                    color= ~prod.cat(input$products),
                    stroke = TRUE,
                    fillOpacity = 1,
-                   weight = 1,
+                   weight = 3,
                    label = facilities$Prdct_C,
-                   radius= 40)
+                   radius= 100)
     })
+
   
   #Define reactive data based on user inputs. Return full data set if no filters selected
   filtered_chemical_data <- reactive({
