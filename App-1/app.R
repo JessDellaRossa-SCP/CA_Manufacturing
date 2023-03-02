@@ -70,130 +70,130 @@ ui <- fluidPage(
   #Interactive Map Page ---- 
   navbarPage("California Manufacturing Activity Project",
              id = "home",
-      tabPanel(id= "map", title = "Interactive Map", fluid = TRUE, icon = icon("compass"),
-               #Options on left-hand side for map
-               sidebarLayout(
-                 sidebarPanel(
-                   #Panel options for Product Categories
-                   titlePanel("Product Category"),
-                   #Instructions for reader
-                   helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
-                   fluidRow(column(8,
-                                   #Select product categories to show on map
-                                   checkboxGroupInput("products", 
-                                                      h4("Potential Product Categories"), 
-                                                      choices = c(prod_cat_choices)))),
-                   hr(),
-                   #Panel options for Significant Habitat Rankings
-                   titlePanel("Significant Habitat Rankings"),
-                   #Instructions for reader
-                   helpText("Explore California's aquatic and terrestrial significant habitats through rank filters. See the 'About the Datasets' tab for more information."),
-                   fluidRow(column(8,
-                                   #Select which rank(s) to plot
-                                   checkboxGroupInput("aquatic", 
-                                                      h4("Aquatic Significant Habitat Rank"), 
-                                                      choices = list("Rank 5" = 5,
-                                                                     "Rank 4" = 4)),
-                                   checkboxGroupInput("terrestrial", 
-                                                      h4("Terrestrial Significant Habitat Rank"), 
-                                                      choices = list("Rank 5" = 5,
-                                                                     "Rank 4" = 4))
-                                   )),
-                   hr(),
-                   #Panel Options for Disadvantaged Communities
-                   titlePanel("Within Disadvantaged Community Tract"),
-                   #Instructions for reader
-                   helpText("Select to viw tracts identified as disadvantaged communities. See the 'About the Datasets' tab for more information"),
-                   fluidRow(column(8,
-                                   #Select yes or no
-                                   checkboxGroupInput("dacs",
-                                                      h4("Disadvantaged Community Tracts"),
-                                                      choices = c("Tribal Boundary" = "Tribal Boundary", 
-                                                                  "DAC Census Tract" = "CalEnviroScreen Score"))))
-                   
-                   ),
-                 #Output interactive mapping
-                 mainPanel(
-                   h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
-                   leafletOutput("map", height = "800px")
-                   ))),
-      
-      #Panel for manufacturing data table ----
-      tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table"),
-               #Options for left-hand side bar
-               sidebarLayout(
-                 sidebarPanel(
-                   width = 4,
-                   titlePanel("California Manufacturers"),
-                   helpText("Check Product Category box to see relevant manufacturers"),
-                   fluidRow(column(8,
-                                   checkboxGroupInput("ProductCategories",
-                                                      label = "Product Categories",
-                                                      choices = c(prod_cat_choices))
-               ))),
-               mainPanel(
-                 h2("Manufacturer Data Table", align = "center", style = "color:#00819D"),
-                 DT::dataTableOutput("mantable"), style = "font-size:80%",
-                 downloadButton("download_mandata", "Download filtered data"))
-               )),
-      
-      #Panel for chemical data table ----
-      tabPanel(id = "chemicaltable", title = "Chemical Data Table", fluid = TRUE, icon=icon("flask"),
-               #Options for left-hand side bar:
-               sidebarLayout(
-                 sidebarPanel(
-                   width = 4,
-                   titlePanel("Candidate Chemicals"),
-                   helpText("Shows only chemicals that are on the Candidate Chemicals List"),
-                   fluidRow(column(8,
-                                   checkboxGroupInput("Candidate Chemicals",
-                                                      label = "Candidate Chemicals",
-                                                      choices = c("Yes", "No"))
-                                   )),
-                   hr(),
-                   titlePanel("Poly- and Perfluoroalkyl Substances (PFAS)"),
-                   fluidRow(column(8,
-                                   checkboxGroupInput("PFAS",
-                                                      label = "PFAS",
-                                                      choices = c("Yes", "No"))
-                                   ))
-                 ),
-                 mainPanel(
-                   h2("Chemical Data", align = "center", style = "color:#00819D"),
-                   DT::dataTableOutput("chemtable"), style = "font-size:80%",
-                   downloadButton("download_chemdata", "Download filtered chemical data")
-                 )
-               )),
-      
-      #Panel for tool instructions ----
-      tabPanel(id = "howto", title = "About This Tool", fluid = TRUE, icon= icon("question"),
-               fluidRow(column(6,
-                               HTML("<title> How to Use This Tool </title>")),
-                        uiOutput("markdown"))),
-      
-      #Panel describing datasets ----
-      tabPanel(id = "about", title = "About the Datasets", fluid = TRUE, icon= icon("database"),
-               fluidRow(column(6,
-                               HTML("<title> About the Datasets </title>")),
-                        uiOutput("markdown.about"))),
-      
-      #Panel describing project methods ----
-      tabPanel(id = "methods", title = "Methods", fluid = TRUE, icon = icon("gear"),
-               fluidRow(column(6,
-                               HTML("<title> Methods </title>")),
-                        uiOutput("markdown.methods"))),
-      tabPanel(id = "references", title = "References", fluid= TRUE, icon = icon("circle-info"),
-               fluidRow(column(6,
-                               HTML("<title> References </title>")),
-                        column(12,
-                               #text
-                               tags$div(HTML("<a href = 'https://dtsc.ca.gov/scp/'>
+             tabPanel(id= "map", title = "Interactive Map", fluid = TRUE, icon = icon("compass"),
+                      #Options on left-hand side for map
+                      sidebarLayout(
+                        sidebarPanel(
+                          #Panel options for Product Categories
+                          titlePanel("Product Category"),
+                          #Instructions for reader
+                          helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
+                          fluidRow(column(8,
+                                          #Select product categories to show on map
+                                          checkboxGroupInput("products", 
+                                                             h4("Potential Product Categories"), 
+                                                             choices = c(prod_cat_choices)))),
+                          hr(),
+                          #Panel options for Significant Habitat Rankings
+                          titlePanel("Significant Habitat Rankings"),
+                          #Instructions for reader
+                          helpText("Explore California's aquatic and terrestrial significant habitats through rank filters. See the 'About the Datasets' tab for more information."),
+                          fluidRow(column(8,
+                                          #Select which rank(s) to plot
+                                          checkboxGroupInput("aquatic", 
+                                                             h4("Aquatic Significant Habitat Rank"), 
+                                                             choices = list("Rank 5" = 5,
+                                                                            "Rank 4" = 4)),
+                                          checkboxGroupInput("terrestrial", 
+                                                             h4("Terrestrial Significant Habitat Rank"), 
+                                                             choices = list("Rank 5" = 5,
+                                                                            "Rank 4" = 4))
+                          )),
+                          hr(),
+                          #Panel Options for Disadvantaged Communities
+                          titlePanel("Within Disadvantaged Community Tract"),
+                          #Instructions for reader
+                          helpText("Select to viw tracts identified as disadvantaged communities. See the 'About the Datasets' tab for more information"),
+                          fluidRow(column(8,
+                                          #Select yes or no
+                                          checkboxGroupInput("dacs",
+                                                             h4("Disadvantaged Community Tracts & Tribal"),
+                                                             choices = c("Tribal Boundary" = "Tribal Boundary", 
+                                                                         "DAC Census Tract" = "CalEnviroScreen Score"))))
+                          
+                        ),
+                        #Output interactive mapping
+                        mainPanel(
+                          h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
+                          leafletOutput("map", height = "800px")
+                        ))),
+             
+             #Panel for manufacturing data table ----
+             tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table"),
+                      #Options for left-hand side bar
+                      sidebarLayout(
+                        sidebarPanel(
+                          width = 4,
+                          titlePanel("California Manufacturers"),
+                          helpText("Check Product Category box to see relevant manufacturers"),
+                          fluidRow(column(8,
+                                          checkboxGroupInput("ProductCategories",
+                                                             label = "Product Categories",
+                                                             choices = c(prod_cat_choices))
+                          ))),
+                        mainPanel(
+                          h2("Manufacturer Data Table", align = "center", style = "color:#00819D"),
+                          DT::dataTableOutput("mantable"), style = "font-size:80%",
+                          downloadButton("download_mandata", "Download filtered data"))
+                      )),
+             
+             #Panel for chemical data table ----
+             tabPanel(id = "chemicaltable", title = "Chemical Data Table", fluid = TRUE, icon=icon("flask"),
+                      #Options for left-hand side bar:
+                      sidebarLayout(
+                        sidebarPanel(
+                          width = 4,
+                          titlePanel("Candidate Chemicals"),
+                          helpText("Shows only chemicals that are on the Candidate Chemicals List"),
+                          fluidRow(column(8,
+                                          checkboxGroupInput("Candidate Chemicals",
+                                                             label = "Candidate Chemicals",
+                                                             choices = c("Yes", "No"))
+                          )),
+                          hr(),
+                          titlePanel("Poly- and Perfluoroalkyl Substances (PFAS)"),
+                          fluidRow(column(8,
+                                          checkboxGroupInput("PFAS",
+                                                             label = "PFAS",
+                                                             choices = c("Yes", "No"))
+                          ))
+                        ),
+                        mainPanel(
+                          h2("Chemical Data", align = "center", style = "color:#00819D"),
+                          DT::dataTableOutput("chemtable"), style = "font-size:80%",
+                          downloadButton("download_chemdata", "Download filtered chemical data")
+                        )
+                      )),
+             
+             #Panel for tool instructions ----
+             tabPanel(id = "howto", title = "About This Tool", fluid = TRUE, icon= icon("question"),
+                      fluidRow(column(6,
+                                      HTML("<title> How to Use This Tool </title>")),
+                               uiOutput("markdown"))),
+             
+             #Panel describing datasets ----
+             tabPanel(id = "about", title = "About the Datasets", fluid = TRUE, icon= icon("database"),
+                      fluidRow(column(6,
+                                      HTML("<title> About the Datasets </title>")),
+                               uiOutput("markdown.about"))),
+             
+             #Panel describing project methods ----
+             tabPanel(id = "methods", title = "Methods", fluid = TRUE, icon = icon("gear"),
+                      fluidRow(column(6,
+                                      HTML("<title> Methods </title>")),
+                               uiOutput("markdown.methods"))),
+             tabPanel(id = "references", title = "References", fluid= TRUE, icon = icon("circle-info"),
+                      fluidRow(column(6,
+                                      HTML("<title> References </title>")),
+                               column(12,
+                                      #text
+                                      tags$div(HTML("<a href = 'https://dtsc.ca.gov/scp/'>
                                <img src= 'SCP_Logo.png' width = '128' height = '98.5'style=' margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px' /> </a>
                                <hr>"))),
-                        uiOutput("markdown.references")))
-      
-))
-      
+                               uiOutput("markdown.references")))
+             
+  ))
+
 # Define server logic 
 server <- function(input, output, session) {
   
@@ -222,31 +222,31 @@ server <- function(input, output, session) {
     leaflet(options = leafletOptions(minZoom = 5.5, maxZoom = 18)) %>%
       addTiles() %>% 
       setView(lat = 36.778259, lng = -119.417931, zoom = 6)
-    })
-
+  })
+  
   #rendering map --
   output$map <- renderLeaflet({
     mapbase() %>% 
       addProviderTiles(providers$Stamen.Terrain, group = "Terrain")
-    })
+  })
   
   #Observe aquatic significant habitat filter changes
   observeEvent({input$aquatic
     input$terrestrial
     input$products
     input$dacs}, {
-    leafletProxy("map") %>% 
-      clearShapes() %>% 
-      addPolygons(data=aq_data(), 
-                  fillColor= ~aq5(input$aquatic),
-                  fillOpacity =.7,
-                  color= NA) %>% 
-      addPolygons(data=tr_data(),
-                  fillColor= ~tr5(input$terrestrial),
-                  fillOpacity =.7,
-                  color= NA) %>% 
+      leafletProxy("map") %>% 
+        clearShapes() %>% 
+        addPolygons(data=aq_data(), 
+                    fillColor= ~aq5(input$aquatic),
+                    fillOpacity =.7,
+                    color= NA) %>% 
+        addPolygons(data=tr_data(),
+                    fillColor= ~tr5(input$terrestrial),
+                    fillOpacity =.7,
+                    color= NA) %>% 
         addPolygons(data=dac_data(),
-                    fillColor=~dacs_col(input$dacs),
+                    fillColor= ~dacs_col(input$dacs),
                     fillOpacity = 0.4,
                     color = "#000000",
                     weight =1,
@@ -257,12 +257,12 @@ server <- function(input, output, session) {
                       direction = "auto")) %>% 
         addCircles(data = man_fac(),
                    color= ~prod.cat(input$products),
-                   stroke = FALSE,
+                   stroke = TRUE,
                    fillOpacity = 1,
                    weight = 1,
                    label = facilities$Prdct_C,
                    radius= 40)
-  })
+    })
   
   #Define reactive data based on user inputs. Return full data set if no filters selected
   filtered_chemical_data <- reactive({
@@ -355,7 +355,7 @@ server <- function(input, output, session) {
   output$markdown.references <- renderUI({
     HTML(markdown::markdownToHTML(knit("references.Rmd", quiet=T), fragment.only = T))
   })
-
+  
 }
 # Run the application 
 shinyApp(ui = ui, server = server)
