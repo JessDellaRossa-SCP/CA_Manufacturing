@@ -86,9 +86,10 @@ ui <- fluidPage(
                           helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
                           fluidRow(column(8,
                                           #Select product categories to show on map
-                                          checkboxGroupInput("products", 
-                                                             h4("Potential Product Categories"), 
-                                                             choices = c(prod_cat_choices)))),
+                                          radioButtons("products",
+                                                       h4("Potential Product Categories"),
+                                                       choices = c(prod_cat_choices),
+                                                       selected = character(0)))),
                           hr(),
                           #Panel options for Significant Habitat Rankings
                           titlePanel("Significant Habitat Rankings"),
@@ -153,7 +154,7 @@ ui <- fluidPage(
                           ))
                         ),
                         mainPanel(
-                          h2("Chemical Data", align = "center", style = "color:#00819D"),
+                          h2("Chemical Data Table", align = "center", style = "color:#00819D"),
                           DT::dataTableOutput("chemtable"), style = "font-size:80%",
                           downloadButton("download_chemdata", "Download filtered chemical data")
                         )
@@ -221,7 +222,7 @@ server <- function(input, output, session) {
   #rendering map --
   output$map <- renderLeaflet({
     mapbase() %>% 
-      addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>% 
+      addProviderTiles(providers$Stamen.Terrain) %>% 
       addPolygons(data = dacs,
                   fillColor= ~dacs_col(DAC_cat),
                   fillOpacity = 0.4,
@@ -237,7 +238,17 @@ server <- function(input, output, session) {
                       pal = dacs_col,
                       title = "DAC Type",
                       shape = "rect",
-                      values = dacs$DAC_cat)
+                      values = dacs$DAC_cat) %>% 
+      addLegendFactor(position = "bottomright",
+                      pal = aq5,
+                      title = "Aquatic Rank",
+                      shape = "rect",
+                      values = aquatic_lyr$AqHabRank) %>% 
+      addLegendFactor(position = "bottomright",
+                      pal = tr5,
+                      title = "Terrestrial Rank",
+                      shape = "rect",
+                      values = terrestrial_lyr$TerrHabRan)
   })
   
   #Observe aquatic significant habitat filter changes
@@ -264,7 +275,7 @@ server <- function(input, output, session) {
                    color= ~prod.cat(input$products),
                    stroke = TRUE,
                    fillOpacity = 1,
-                   weight = 3,
+                   weight = 5,
                    label = facilities$Prdct_C,
                    radius= 100)
     })
