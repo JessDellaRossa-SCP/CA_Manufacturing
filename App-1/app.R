@@ -109,9 +109,22 @@ ui <- fluidPage(
                         ),
                         #Output interactive mapping
                         mainPanel(
-                          h2("California Manufacturing Activity Interactive Map", align = "center", style = "color:#00819D"),
-                          leafletOutput("map", height = "800px")
-                        ))),
+                          h2("California Manufacturer Interactive Map", align = "center", style = "color:#00819D"),
+                          leafletOutput("map", height = "800px"),
+                          
+                          hr(),
+                          fluidRow(column(8,
+                                          #This adds a tip to click on a facility to populate the table
+                                          helpText("Click facility to populate table below with information about the facility")),
+                          column(width = 2, offset = 2, conditionalPanel(
+                            condition = "output.facilityFinder",
+                            #clears selected facilities
+                            actionButton(inputId = "FinderClear", label = "Clear Table")
+                          )),
+                          fluidRow(
+                            dataTableOutput(outputId = "output.facilityFinder")
+                          )
+                        )))),
              
              #Panel for manufacturing data table ----
              tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table"),
@@ -279,7 +292,27 @@ server <- function(input, output, session) {
                    label = facilities$Prdct_C,
                    radius= 100)
     })
+  
+  #I think to click on map?
+  user_clickFinder <- reactiveValues()
+  reactive({
+    user_clickFinder$DT <- data.frame(matrix(0, ncol = ncol(facilities), nrow = 10))
+    names(user_clickFinder$DT) <- colnames(facilities)
+  })
 
+  #Clear data table for clicked facility on map
+  observeEvent({
+    input$FinderClear
+  },{user_clickFinder$DT <- NULL})
+  
+  #Data table for clicked facility on map
+  output$facilityFinder <- DT::renderDataTable({
+    DT:datatable(
+      manufacturers_data(), filter = "top", 
+      class = "cell-border stripe",
+      options = list(autoWidth = TRUE)
+    )
+  })
   
   #Define reactive data based on user inputs. Return full data set if no filters selected
   filtered_chemical_data <- reactive({
