@@ -34,13 +34,13 @@ naics_groups <- naics_individual %>%
   count(groups) %>% 
   arrange(desc(n))
 
-
 title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
+th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
 
 ggplot(naics_groups) +
  aes(x = groups, y = n, fill = groups) +
  geom_col() +
- scale_fill_manual(values = c(", 
+ scale_fill_manual(values = c( 
 `312` = "#E98141", `313` = "#DA8C15", `314` = "#C69600", `315` = "#ACA000", `316` = "#93AA00", `321` = "#58B016", 
 `322` = "#1DB62C", `323` = "#00BB4C", `324` = "#00BE75", `325` = "#00C19F", `326` = "#00BDBA", `327` = "#00BAD5", 
 `331` = "#13B3E8", `332` = "#3AA7F3", `333` = "#619CFF", `334` = "#918BFD", `335` = "#C27AFB", `336` = "#E26EEF", 
@@ -50,39 +50,6 @@ ggplot(naics_groups) +
 ```
 
 
-```{r}
-#Group NAICS categories - take the first 3 digits from NAICS codes to see how many.
-naics_individual$groups4 <- naics_individual$code %>% 
-  str_sub(start = 1, end = 4)
-  
-
-naics_groups4 <- naics_individual %>% 
-  filter(grepl("^31", code) | grepl("^32", code)| grepl("^33", code)) %>% 
-  count(groups4) %>% 
-  arrange(desc(n))
-
-#esquisser(naics_groups4)
-
-title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
-th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
-
-ggplot(naics_groups4) +
- aes(x = groups4, y = n) +
- geom_col(fill = "#112446") +
- theme_minimal() + title + 
-  labs(x = "NAICS 4 Digit Group", y = "Count", title = "NAICS Groups Count") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-
-
-
-```
-
-```{r}
-naics_groups$groups
-#write.csv(naics_groups, "~\\DTSC\\Manufacturing_Projects\\csv\\naics_3.csv", row.names=FALSE)
-```
 
 ```{r}
 #Group NAICS categories - take the first 3 digits from NAICS codes to see how many.
@@ -109,7 +76,45 @@ ggplot(sic_groups) +
   ) +
   theme_minimal() + title + theme(axis.text.x = element_text(angle=45, hjust =1)) + theme(legend.position = "none")
 ```
+
 ```{r}
-#write.csv(sic_groups, "~\\DTSC\\Manufacturing_Projects\\csv\\sic_3.csv", row.names=FALSE)
+facil_count <- master %>% 
+  group_by(Product_Category) %>% 
+  summarize(n = n()) %>% 
+  arrange(desc(n))
+facil_count
+```
+
+
+```{r}
+
+prod_plot <- ggplot(facil_count) +
+  aes(x = n, y = Product_Category,fill = Product_Category) +
+  geom_col() +
+  scale_fill_hue(direction = 1) +
+  geom_text(aes(label=n)) +
+  theme_minimal() +
+  title + 
+  theme(legend.position = "none") +
+  labs(
+    x = "Product Category",
+    y = "Count of Manufacturing Facility",
+    title = "Facility Breakdown by Product Category") 
+
+prod_plot
+
+```
+
+```{r}
+chem_count <- master %>% 
+  group_by(Chemical_data) %>% 
+  summarize(n = n()) %>% 
+  arrange(desc(n))
+chem_count
+```
+
+```{r}
+master %>% 
+  
 ```
 
