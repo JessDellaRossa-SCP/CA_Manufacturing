@@ -9,14 +9,13 @@ output: html_document
 library(tidyverse)
 library(knitr)
 library(stringr)
-library(esquisse)
 knitr::opts_chunk$set(echo = TRUE)
-opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
+opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/Manufacturing-SCP/Data/Clean_Data")
 rm(list = ls())
 ```
 
 ```{r}
-master <- read.csv("Master_Facility_FINAL_v2.csv")
+master <- read_excel("facilities_shiny.xlsx")
 naics_individual <- read.csv("naics_groups.csv")
 naics_counted <- read.csv("naics_counted.csv") 
 sic_counted <- read.csv("sic_counted.csv")

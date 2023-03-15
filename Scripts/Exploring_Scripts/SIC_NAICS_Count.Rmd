@@ -9,35 +9,36 @@ output: html_document
 library(tidyverse)
 library(knitr)
 library(stringr)
-library(esquisse)
+library(readxl)
 knitr::opts_chunk$set(echo = TRUE)
-opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/csv")
+opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/Manufacturing-SCP/Data/Clean_Data")
 rm(list = ls())
 ```
 
 
 ```{r}
-master <- read.csv("Master_Facility_FINAL_v2.csv")
+master <- read_excel("facilities_shiny.xlsx")
 ```
 
 ```{r}
 naics <- master %>% 
-  count(NAICS_CODES) %>% 
-  arrange(desc(n))
-```
-```{r}
-sic <- master %>% 
-  count(SIC_CODES) %>% 
+  count(NAICS_Code) %>% 
   arrange(desc(n))
 ```
 
 ```{r}
-SICs_needed <-  ifelse(master$NAICS_CODES == "", master$SIC_CODES, "")
+sic <- master %>% 
+  count(SIC_Code) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+SICs_needed <-  ifelse(master$NAICS_Code == "", master$SIC_Code, "")
 ```
 
 ```{r}
 sic_separated <- str_split(SICs_needed,"\\,\\s" )
-sic_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= sic_separated,SIMPLIFY = FALSE)
+sic_sep <- mapply(function(id,code) data.frame(id,code), id= master$Program_ID, code= sic_separated,SIMPLIFY = FALSE)
 
 sic_individual <- do.call(rbind,sic_sep)
 sic_counted <- sic_individual %>% 
@@ -47,13 +48,13 @@ sic_counted <- sic_individual %>%
 
 
 ```{r}
-unique <- as.character(naics$NAICS_CODES)
+unique <- as.character(naics$NAICS_Code)
 #unique <- paste0(unique, collapse=", ") #this gets rid of "the quotes, but we want this to count NAICS.
 ```
 
 ```{r}
-naics_separated <- str_split(master$NAICS_CODES,"\\,\\s" )
-naics_sep <- mapply(function(id,code) data.frame(id,code), id= master$FRS_REGISTRY_ID, code= naics_separated,SIMPLIFY = FALSE)
+naics_separated <- str_split(master$NAICS_Code,"\\,\\s" )
+naics_sep <- mapply(function(id,code) data.frame(id,code), id= master$Program_ID, code= naics_separated,SIMPLIFY = FALSE)
 
 head(naics_sep[[1]])
 head(naics_separated)
