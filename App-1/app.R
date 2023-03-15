@@ -116,15 +116,13 @@ ui <- fluidPage(
                           fluidRow(column(8,
                                           #This adds a tip to click on a facility to populate the table
                                           helpText("Click facility to populate table below with information about the facility")),
-                          column(width = 2, offset = 2, conditionalPanel(
-                            condition = "output.facilityFinder",
-                            #clears selected facilities
-                            actionButton(inputId = "FinderClear", label = "Clear Table")
-                          )),
+                                   column(width = 2, offset = 2, conditionalPanel(
+                                     condition = "output.table_input"))),
+                          br(),
                           fluidRow(
-                            dataTableOutput(outputId = "output.facilityFinder")
+                            DT::dataTableOutput(outputId = "table_input")
                           )
-                        )))),
+                        ))),
              
              #Panel for manufacturing data table ----
              tabPanel(id = "datatable", title = "Manufacturer Data Table", fluid = TRUE, icon=icon("table"),
@@ -232,36 +230,39 @@ server <- function(input, output, session) {
       setView(lat = 36.778259, lng = -119.417931, zoom = 6)
   })
   
-  #rendering map --
-  output$map <- renderLeaflet({
-    mapbase() %>% 
-      addProviderTiles(providers$Stamen.Terrain) %>% 
-      addPolygons(data = dacs,
-                  fillColor= ~dacs_col(DAC_cat),
-                  fillOpacity = 0.4,
-                  color= "black",
-                  weight=1,
-                  group = "DACs",
-                  label = dac_label,
-                  labelOptions = labelOptions(
-                    style = list("font-weight" = "normal",padding = "3px 8px"),
-                    textsize = "15px",
-                    direction = "auto")) %>% 
-      addLegendFactor(position = "bottomright",
-                      pal = dacs_col,
-                      title = "DAC Type",
-                      shape = "rect",
-                      values = dacs$DAC_cat) %>% 
-      addLegendFactor(position = "bottomright",
-                      pal = aq5,
-                      title = "Aquatic Rank",
-                      shape = "rect",
-                      values = aquatic_lyr$AqHabRank) %>% 
-      addLegendFactor(position = "bottomright",
-                      pal = tr5,
-                      title = "Terrestrial Rank",
-                      shape = "rect",
-                      values = terrestrial_lyr$TerrHabRan)
+  session$onFlushed(once = T, function() {
+    
+    #rendering map --
+    output$map <- renderLeaflet({
+      mapbase() %>% 
+        addProviderTiles(providers$Stamen.Terrain) %>% 
+        addPolygons(data = dacs,
+                    fillColor= ~dacs_col(DAC_cat),
+                    fillOpacity = 0.4,
+                    color= "black",
+                    weight=1,
+                    group = "DACs",
+                    label = dac_label,
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal",padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
+        addLegendFactor(position = "bottomright",
+                        pal = dacs_col,
+                        title = "DAC Type",
+                        shape = "rect",
+                        values = dacs$DAC_cat) %>% 
+        addLegendFactor(position = "bottomright",
+                        pal = aq5,
+                        title = "Aquatic Rank",
+                        shape = "rect",
+                        values = aquatic_lyr$AqHabRank) %>% 
+        addLegendFactor(position = "bottomright",
+                        pal = tr5,
+                        title = "Terrestrial Rank",
+                        shape = "rect",
+                        values = terrestrial_lyr$TerrHabRan)
+    })
   })
   
   #Observe aquatic significant habitat filter changes
@@ -293,26 +294,25 @@ server <- function(input, output, session) {
                    radius= 100)
     })
   
-  #I think to click on map?
-  user_clickFinder <- reactiveValues()
-  reactive({
-    user_clickFinder$DT <- data.frame(matrix(0, ncol = ncol(facilities), nrow = 10))
-    names(user_clickFinder$DT) <- colnames(facilities)
-  })
-
-  #Clear data table for clicked facility on map
-  observeEvent({
-    input$FinderClear
-  },{user_clickFinder$DT <- NULL})
   
-  #Data table for clicked facility on map
-  output$facilityFinder <- DT::renderDataTable({
-    DT:datatable(
-      manufacturers_data(), filter = "top", 
-      class = "cell-border stripe",
-      options = list(autoWidth = TRUE)
+  # Table interface
+  output$table_input=DT::renderDataTable({
+    DT::datatable(filtered_chemical_data(), filter = "top", 
+                   class = "cell-border stripe",
+                   options = list(autoWidth = TRUE)
     )
   })
+  
+  # Update table on click event
+  observeEvent(input$map_marker_click, {
+    lat <- input$map_marker_click$lat
+    lng <- input$map_marker_click$lng
+    clicked_row <- facilities[facilites$lat == lat & facilities$lon == lng, ]
+    if (nrow(clicked_row) > 0) {
+      replaceData(proxy = "table_input", data = clicked_row, rownames = FALSE)
+    }
+  })
+  
   
   #Define reactive data based on user inputs. Return full data set if no filters selected
   filtered_chemical_data <- reactive({
