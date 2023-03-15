@@ -33,7 +33,7 @@ sic <- master %>%
 ```
 
 ```{r}
-SICs_needed <-  ifelse(master$NAICS_Code == "", master$SIC_Code, "")
+SICs_needed <-  ifelse(master$NAICS_Code == "NA", master$SIC_Code, "")
 ```
 
 ```{r}

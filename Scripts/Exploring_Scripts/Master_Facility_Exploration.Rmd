@@ -40,7 +40,7 @@ title<-theme(plot.title = element_text(face="bold", hjust= 0.5))
 ggplot(naics_groups) +
  aes(x = groups, y = n, fill = groups) +
  geom_col() +
- scale_fill_manual(values = c(`311` = "#F8766D", 
+ scale_fill_manual(values = c(", 
 `312` = "#E98141", `313` = "#DA8C15", `314` = "#C69600", `315` = "#ACA000", `316` = "#93AA00", `321` = "#58B016", 
 `322` = "#1DB62C", `323` = "#00BB4C", `324` = "#00BE75", `325` = "#00C19F", `326` = "#00BDBA", `327` = "#00BAD5", 
 `331` = "#13B3E8", `332` = "#3AA7F3", `333` = "#619CFF", `334` = "#918BFD", `335` = "#C27AFB", `336` = "#E26EEF", 
