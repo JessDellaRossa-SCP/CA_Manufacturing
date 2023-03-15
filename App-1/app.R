@@ -66,7 +66,7 @@ dacs <-st_transform(dacs, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_def
 aq5 <- colorFactor(c("#8c510a", "#35978f"), domain = aquatic_lyr$AqHabRank)
 tr5 <- colorFactor(c("#fdb863", "#542788"), domain = terrestrial_lyr$TerrHabRan)
 prod.cat <- colorFactor(polychrome(20), domain = facilities$Prdct_C)
-dacs_col <- colorFactor(c("#c51b8a", "#1c9099"), domain = dacs$DAC_cat)
+dacs_col <- colorFactor(c("#fb6a4a", "#a50f15"), domain = dacs$DAC_cat)
 
 ### Create User Interface -------
 ui <- fluidPage(
