@@ -94,7 +94,7 @@ prod_plot <- ggplot(facil_count) +
   aes(x = n, y = reorder(Product_Category, -n), fill = Product_Category) +
   geom_col() +
   scale_fill_hue(direction = 1) +
-  geom_text(aes(label=n)) +
+  geom_text(aes(label=n), hjust = -.3, size = 3.5 ) +
   theme_minimal() +
   title + 
   theme(legend.position = "none") +

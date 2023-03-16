@@ -113,8 +113,13 @@ ggplot(aquatic_hab) +
 ```{r}
 ggplot(aquatic_hab) +
  aes(x = AqHabRank) +
- geom_histogram(bins = 30L, fill = "#5D89AE") +
- theme_bw() + labs(title= "Count of Aquatic Significant Habitats by Rank", x = "Aquatic Significant Habitat Rank", y= "Count of HUC 12") + title
+ geom_bar( fill = "#00819D") +
+ theme_minimal() + labs( x = "", y= "") + title + coord_flip()
+
+ggplot(terrestrial_hab) +
+ aes(x = TerrHabRank) +
+ geom_bar( fill = "#00819D") +
+ theme_minimal() + labs( x = "", y= "") + title + coord_flip()
 ```
 
 ```{r}
