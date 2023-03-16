@@ -12,9 +12,6 @@ library(stringr)
 knitr::opts_chunk$set(echo = TRUE)
 opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/Manufacturing-SCP/Data/Clean_Data")
 rm(list = ls())
-```
-
-```{r}
 master <- read_excel("facilities_shiny.xlsx")
 naics_individual <- read.csv("naics_groups.csv")
 naics_counted <- read.csv("naics_counted.csv") 
