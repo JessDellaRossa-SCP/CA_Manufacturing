@@ -84,7 +84,6 @@ facil_count
 
 
 ```{r}
-
 prod_plot <- ggplot(facil_count) +
   aes(x = n, y = Product_Category,fill = Product_Category) +
   geom_col() +
@@ -99,18 +98,42 @@ prod_plot <- ggplot(facil_count) +
     title = "Facility Breakdown by Product Category") 
 
 prod_plot
-
 ```
 
 ```{r}
+master <- master %>% 
+  rename("Chemical_data" = "Chemical Data")
+
+
 chem_count <- master %>% 
-  group_by(Chemical_data) %>% 
-  summarize(n = n()) %>% 
-  arrange(desc(n))
-chem_count
+  distinct(Program_ID, .keep_all=TRUE)
+
+
+chem_count <- chem_count %>% 
+  select(Chemical_data, PFAS_on_site, Presumptious_PFAS)
+
 ```
 
 ```{r}
+library(esquisse)
+esquisser(chem_count)
 
+chem_plot <- ggplot(chem_count) +
+  aes(x = Chemical_data, fill = PFAS_on_site) +
+  geom_bar() +
+  scale_fill_manual(
+    values = c(No = "#00819D",
+    Yes = "#8D67A2",
+    `Yes or depends on definition` = "#4B8400")
+  ) +
+  labs(
+    x = "Chemical Data Present",
+    y = "Count of Manufacturing Facitlies",
+    title = "Manufacturing Facilities with Chemical Data",
+    fill = "PFAS on Site"
+  ) +
+  coord_flip() +
+  theme_minimal()+ title
+chem_plot
 ```
 
