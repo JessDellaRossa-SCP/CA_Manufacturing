@@ -9,9 +9,15 @@ output: html_document
 library(tidyverse)
 library(knitr)
 library(stringr)
+library(readxl)
 knitr::opts_chunk$set(echo = TRUE)
 opts_knit$set(root.dir ="~/DTSC/Manufacturing_Projects/Manufacturing-SCP/Data/Clean_Data")
 rm(list = ls())
+```
+
+
+```{r}
+setwd("~/DTSC/Manufacturing_Projects/Manufacturing-SCP/Data/Clean_Data")
 master <- read_excel("facilities_shiny.xlsx")
 naics_individual <- read.csv("naics_groups.csv")
 naics_counted <- read.csv("naics_counted.csv") 
@@ -85,7 +91,7 @@ facil_count
 
 ```{r}
 prod_plot <- ggplot(facil_count) +
-  aes(x = n, y = Product_Category,fill = Product_Category) +
+  aes(x = n, y = reorder(Product_Category, -n), fill = Product_Category) +
   geom_col() +
   scale_fill_hue(direction = 1) +
   geom_text(aes(label=n)) +
@@ -115,8 +121,6 @@ chem_count <- chem_count %>%
 ```
 
 ```{r}
-library(esquisse)
-esquisser(chem_count)
 
 chem_plot <- ggplot(chem_count) +
   aes(x = Chemical_data, fill = PFAS_on_site) +

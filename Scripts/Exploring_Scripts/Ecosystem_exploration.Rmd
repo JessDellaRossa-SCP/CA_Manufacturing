@@ -19,6 +19,7 @@ th=theme_bw(base_size=10)+theme(strip.background= element_rect(fill="white"))
 ```
 
 ```{r}
+setwd("~/DTSC/Manufacturing_Projects/csv/Ecosystems")
 terrestrial_hab <- read.csv("Terrestrial_significant_habitats.csv")
 hab_connectivity <- read.csv("Habitat_connectivity.csv")
 aq.bio <- read.csv("Aquatic_biodiversity.csv")
@@ -52,9 +53,18 @@ regions<- terrestrial_hab %>%
 
 ```{r}
 ggplot(terrestrial_hab) +
- aes(x = TerrHabRank) +
- geom_histogram(bins = 30L, fill = "#5D89AE") +
- theme_bw() + labs(title= "Count of Terrestrial Significant Habitats by Rank", x = "Terrestrial Significant Habitat Rank", y= "Count of Hexes") + title
+  aes(x = "", y = TerrHabRank) +
+  geom_boxplot(fill = "#0084A1") +
+  labs(y = "Terrestrial Habitat Rank") +
+  theme_minimal()
+
+ggplot(aquatic_hab) +
+  aes(x = "", y = AqHabRank) +
+  geom_boxplot(fill = "#0084A1") +
+  labs(y = "Aquatic Habitat Rank") +
+  theme_minimal()
+
+
 ```
 
 
