@@ -83,7 +83,7 @@ ui <- fluidPage(
                           #Panel options for Product Categories
                           titlePanel("Product Category"),
                           #Instructions for reader
-                          helpText("Explore potential product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
+                          helpText("Explore product categories based on NAICS and SIC codes. See the 'Methods' tab for more information."),
                           fluidRow(column(8,
                                           #Select product categories to show on map
                                           radioButtons("products",
@@ -110,18 +110,7 @@ ui <- fluidPage(
                         #Output interactive mapping
                         mainPanel(
                           h2("California Manufacturer Interactive Map", align = "center", style = "color:#00819D"),
-                          leafletOutput("map", height = "800px"),
-                          
-                          hr(),
-                          fluidRow(column(8,
-                                          #This adds a tip to click on a facility to populate the table
-                                          helpText("Click facility to populate table below with information about the facility")),
-                                   column(width = 2, offset = 2, conditionalPanel(
-                                     condition = "output.table_input"))),
-                          br(),
-                          fluidRow(
-                            DT::dataTableOutput(outputId = "table_input")
-                          )
+                          leafletOutput("map", height = "800px")
                         ))),
              
              #Panel for manufacturing data table ----
@@ -140,7 +129,7 @@ ui <- fluidPage(
                         mainPanel(
                           h2("Manufacturer Data Table", align = "center", style = "color:#00819D"),
                           DT::dataTableOutput("mantable"), style = "font-size:80%",
-                          downloadButton("download_mandata", "Download filtered data"))
+                          downloadButton("download_mandata", "Download Data"))
                       )),
              
              #Panel for chemical data table ----
@@ -303,17 +292,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # Update table on click event
-  observeEvent(input$map_marker_click, {
-    lat <- input$map_marker_click$lat
-    lng <- input$map_marker_click$lng
-    clicked_row <- facilities[facilites$lat == lat & facilities$lon == lng, ]
-    if (nrow(clicked_row) > 0) {
-      replaceData(proxy = "table_input", data = clicked_row, rownames = FALSE)
-    }
-  })
-  
-  
+
   #Define reactive data based on user inputs. Return full data set if no filters selected
   filtered_chemical_data <- reactive({
     if (is.null(chemical_data$"Candidate Chemical") && is.null(chemical_data$PFAS)){
