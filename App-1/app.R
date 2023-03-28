@@ -45,8 +45,8 @@ dac_label <- sprintf(
   lapply(htmltools::HTML)
 
 fac_lab <- sprintf(
-  "<h6>%s</h6>",
-  facilities$Prdct_C) %>% 
+  "<strong>", facilities$Fclty_N,
+  "</strong><br>", facilities$Prdct_C) %>% 
   lapply(htmltools::HTML)
 
 
@@ -54,7 +54,7 @@ fac_lab <- sprintf(
 prod_cat_choices <- c("Beauty, Personal Care, and Hygiene Products", "Building Products & Materials Used in Construction and Renovation", "Chemical Manufacturing", "Children's Products",
                       "Cleaning Products", "Electrical Equipment Manufacturing", "Food Packaging", "Household, School, and Workplace Furnishings", "Machinery Manufacturing", "Medical Equipment Manufacturing",
                       "Metal Manufacturing", "Miscellaneous Manufacturing", "Motor Vehicle Tires", "Paper Manufacturing", "Pharmaceuticals", "Plastics Product Manufacturing", "Textiles",
-                      "Tobacco Manufacturing", "Transportation Manufacturing") 
+                      "Tobacco Manufacturing", "Transportation Manufacturing", "Wood Products") 
 
 #Change the projections of these datasets to match WGS84 projection for leaflet.
 aquatic_lyr <- st_transform(aquatic_lyr, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
@@ -87,8 +87,27 @@ ui <- fluidPage(
                           fluidRow(column(8,
                                           #Select product categories to show on map
                                           radioButtons("products",
-                                                       h4("Potential Product Categories"),
-                                                       choices = c(prod_cat_choices),
+                                                       h4("Product Categories"),
+                                                       choices = list("Beauty, Personal Care, and Hygiene Products" = "Beauty, Personal Care, and Hygiene Products",
+                                                                      "Building Products & Materials Used in Construction and Renovation" = "Building Products & Materials Used in Construction and Renovation", 
+                                                                      "Chemical Manufacturing" = "Chemical Manufacturing", 
+                                                                      "Children's Products" = "Children's Products",
+                                                                      "Cleaning Products" = "Cleaning Products", 
+                                                                      "Electrical Equipment Manufacturing" = "Electrical Equipment Manufacturing", 
+                                                                      "Food Packaging" = "Food Packaging", 
+                                                                      "Household, School, and Workplace Furnishings" = "Household, School, and Workplace Furnishings", 
+                                                                      "Machinery Manufacturing" = "Machinery Manufacturing", 
+                                                                      "Medical Equipment Manufacturing" = "Medical Equipment Manufacturing",
+                                                                      "Metal Manufacturing" = "Metal Manufacturing", 
+                                                                      "Miscellaneous Manufacturing" = "Miscellaneous Manufacturing", 
+                                                                      "Motor Vehicle Tires" = "Motor Vehicle Tires",
+                                                                      "Paper Manufacturing" = "Paper Manufacturing", 
+                                                                      "Pharmaceuticals" = "Pharmaceuticals",
+                                                                      "Plastics Product Manufacturing" = "Plastics Product Manufacturing", 
+                                                                      "Textiles" = "Textiles",
+                                                                      "Tobacco Manufacturing" = "Tobacco Manufacturing", 
+                                                                      "Transportation Manufacturing" = "Transportation Manufacturing", 
+                                                                      "Wood Products" = "Wood Products"),
                                                        selected = character(0)))),
                           hr(),
                           #Panel options for Significant Habitat Rankings
@@ -279,7 +298,9 @@ server <- function(input, output, session) {
                    stroke = TRUE,
                    fillOpacity = 1,
                    weight = 5,
-                   label = facilities$Prdct_C,
+                   popup = ~paste(Prgr_ID, "<br>Facility Name:", Fclty_N,
+                                  "<br>Product Category:", Prdct_C,
+                                  "<br>Related to PPWP?", R__PPWP),
                    radius= 100)
     })
   
@@ -287,12 +308,12 @@ server <- function(input, output, session) {
   # Table interface
   output$table_input=DT::renderDataTable({
     DT::datatable(filtered_chemical_data(), filter = "top", 
-                   class = "cell-border stripe",
-                   options = list(autoWidth = TRUE)
+                  class = "cell-border stripe",
+                  options = list(autoWidth = TRUE)
     )
   })
   
-
+  
   #Define reactive data based on user inputs. Return full data set if no filters selected
   filtered_chemical_data <- reactive({
     if (is.null(chemical_data$"Candidate Chemical") && is.null(chemical_data$PFAS)){
