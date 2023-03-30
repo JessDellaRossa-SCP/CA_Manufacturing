@@ -1,0 +1,13 @@
+name: DTSV_v1
+title: DTSV_v1
+username:
+account: dtsc
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8714645
+bundleId: 7025978
+url: https://dtsc.shinyapps.io/DTSV_v1/
+when: 1680135547.04408
+lastSyncTime: 1680135547.04408
+asMultiple: FALSE
+asStatic: FALSE
